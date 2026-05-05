@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALFATEL — Sales Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg0:#03080f;--bg1:#070e1a;--bg2:#0c1626;--bg3:#111e33;
+  --acc:#00e5b0;--acc2:#3b8bff;--acc3:#f5a623;--acc4:#ff4d6d;
+  --t1:#e8edf5;--t2:#8896b0;--t3:#3d5070;
+  --border:rgba(255,255,255,0.06);
+  --font-head:'Syne',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-mono);background:var(--bg0);color:var(--t1);display:flex;flex-direction:column}
+
+.topbar{height:52px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;z-index:100}
+.logo{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--acc);letter-spacing:-0.5px}
+.logo span{color:var(--t2);font-weight:400;font-size:12px;margin-right:8px}
+.nav-tabs{display:flex;gap:2px;margin-right:auto}
+.nav-tab{padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--t2);transition:.2s;font-family:var(--font-mono)}
+.nav-tab:hover{color:var(--t1);background:var(--bg3)}
+.nav-tab.active{color:var(--acc);background:rgba(0,229,176,0.1)}
+.topbar-right{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--t3)}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,229,176,0.08);border:1px solid rgba(0,229,176,0.2);border-radius:20px;padding:4px 10px;color:var(--acc);font-size:11px}
+.live-dot{width:6px;height:6px;background:var(--acc);border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.btn{border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-family:var(--font-mono);font-weight:500;cursor:pointer;transition:.2s}
+.btn-green{background:var(--acc);color:#000}.btn-green:hover{opacity:.85}
+.btn-blue{background:var(--acc2);color:#fff}.btn-blue:hover{opacity:.85}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--t2)}.btn-outline:hover{background:var(--bg3);color:var(--t1)}
+
+.content{flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden}
+.main-panel{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.side-panel{background:var(--bg1);border-right:1px solid var(--border);overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
+.metric-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.metric-val{font-size:22px;font-weight:500;line-height:1;margin-bottom:4px}
+.metric-sub{font-size:11px;color:var(--t2)}
+.metric-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:5px}
+.mb-up{background:rgba(0,229,176,0.1);color:var(--acc)}
+.mb-warn{background:rgba(245,166,35,0.1);color:var(--acc3)}
+.mb-down{background:rgba(255,77,109,0.1);color:var(--acc4)}
+.mb-info{background:rgba(59,139,255,0.1);color:var(--acc2)}
+.c-acc{color:var(--acc)}.c-acc2{color:var(--acc2)}.c-acc3{color:var(--acc3)}.c-acc4{color:var(--acc4)}
+.metric-line{position:absolute;bottom:0;left:0;right:0;height:2px}
+
+.mid-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.card-title{font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--t1)}
+.card-sub{font-size:10px;color:var(--t3)}
+
+.map-container{background:var(--bg0);border-radius:8px;overflow:hidden;margin-bottom:8px}
+.iran-svg{width:100%;display:block}
+
+.deals-table{width:100%;border-collapse:collapse;font-size:11px}
+.deals-table th{text-align:left;color:var(--t3);font-size:10px;padding:4px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;font-weight:400}
+.deals-table td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle}
+.deals-table tr:last-child td{border-bottom:none}
+.deals-table tr:hover td{background:rgba(255,255,255,0.02)}
+.sp{font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.sp-paid{background:rgba(0,229,176,0.1);color:var(--acc)}
+.sp-transit{background:rgba(245,166,35,0.1);color:var(--acc3)}
+.sp-pending{background:rgba(59,139,255,0.1);color:var(--acc2)}
+.sp-delivered{background:rgba(0,229,176,0.15);color:var(--acc)}
+
+.search-box{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--t1);font-family:var(--font-mono);font-size:12px;outline:none}
+.search-box:focus{border-color:rgba(0,229,176,0.3)}
+.search-box::placeholder{color:var(--t3)}
+
+.cust-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:.2s}
+.cust-card:hover{border-color:rgba(0,229,176,0.2)}
+.cust-name{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px}
+.cust-meta{font-size:10px;color:var(--t3);display:flex;gap:6px;flex-wrap:wrap}
+.city-tag{background:var(--bg3);border-radius:3px;padding:1px 5px;color:var(--t2)}
+.cust-stats{display:flex;gap:6px;margin-top:6px}
+.cs-item{flex:1;text-align:center;background:var(--bg0);border-radius:5px;padding:4px}
+.cs-val{font-size:12px;font-weight:500}
+.cs-lbl{font-size:9px;color:var(--t3);margin-top:1px}
+
+.city-bar-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px}
+.city-bar-row:last-child{border-bottom:none}
+.cbr-name{width:80px;color:var(--t2);font-size:10px}
+.cbr-track{flex:1;height:4px;background:var(--bg0);border-radius:2px;overflow:hidden}
+.cbr-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.cbr-val{width:55px;text-align:right;font-size:10px;color:var(--t2)}
+.cbr-cnt{width:30px;text-align:right;font-size:10px;color:var(--t3)}
+
+.chart-wrap{position:relative;height:100px}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+.modal-bg.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid rgba(0,229,176,0.2);border-radius:14px;padding:22px;width:440px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:var(--font-head);font-size:17px;font-weight:700;margin-bottom:18px;color:var(--acc)}
+.form-group{margin-bottom:12px}
+.form-label{font-size:10px;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--t1);font-family:var(--font-mono);font-size:13px;outline:none;transition:.2s}
+.form-input:focus{border-color:rgba(0,229,176,0.4)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+select.form-input option{background:var(--bg2)}
+
+.profit-preview{background:var(--bg0);border-radius:8px;padding:12px;margin:12px 0}
+.pp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.pp-item{text-align:center}
+.pp-val{font-size:16px;font-weight:600;margin-bottom:2px}
+.pp-lbl{font-size:9px;color:var(--t3)}
+.pp-arrow{color:var(--t3);font-size:16px}
+.pp-result{background:rgba(0,229,176,0.08);border:1px solid rgba(0,229,176,0.2);border-radius:6px;padding:10px;text-align:center;margin-top:8px}
+.pp-big{font-size:24px;font-weight:600;color:var(--acc)}
+.pp-sub{font-size:10px;color:var(--t2);margin-top:3px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid rgba(0,229,176,0.3);border-radius:8px;padding:10px 20px;font-size:13px;color:var(--acc);z-index:999;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+
+.loading{display:flex;align-items:center;justify-content:center;height:60px;color:var(--t3);font-size:12px}
+.empty{text-align:center;padding:20px;color:var(--t3);font-size:12px}
+
+.side-section-title{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+
+.sup-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px}
+.sup-name{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px}
+.sup-meta{font-size:10px;color:var(--t3)}
+.sup-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.sup-tag{font-size:10px;background:rgba(245,166,35,0.1);color:var(--acc3);padding:2px 6px;border-radius:3px}
+.rating-stars{color:var(--acc3);font-size:11px;margin-top:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">ALFATEL <span>// Sharjah → Iran</span></div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="setTab('overview',this)">Overview</div>
+    <div class="nav-tab" onclick="setTab('suppliers',this)">Suppliers</div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-pill"><span class="live-dot"></span><span id="sync-label">Syncing...</span></div>
+    <div id="clock">--:--</div>
+    <button class="btn btn-blue" onclick="openModal('supplier-modal')">+ Supplier</button>
+    <button class="btn btn-outline" onclick="openModal('customer-modal')">+ Customer</button>
+    <button class="btn btn-green" onclick="openModal('deal-modal')">+ Deal</button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="main-panel" id="main-panel">
+
+    <!-- OVERVIEW TAB -->
+    <div id="tab-overview">
+      <div class="metrics" id="metrics-row">
+        <div class="metric"><div class="loading">Loading...</div></div>
+        <div class="metric"><div class="loading">Loading...</div></div>
+        <div class="metric"><div class="loading">Loading...</div></div>
+        <div class="metric"><div class="loading">Loading...</div></div>
+      </div>
+
+      <div class="mid-row">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Iran Customer Map</div>
+            <div class="card-sub" id="map-label">loading...</div>
+          </div>
+          <div class="map-container">
+            <svg class="iran-svg" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
+              <rect width="500" height="280" fill="#06101e"/>
+              <path d="M 75 105 L 90 72 L 118 52 L 152 45 L 188 48 L 212 40 L 248 42 L 282 40 L 314 50 L 344 56 L 372 70 L 390 88 L 396 110 L 390 133 L 376 152 L 358 168 L 338 182 L 312 192 L 284 200 L 256 205 L 228 204 L 200 200 L 172 192 L 146 182 L 120 168 L 98 152 L 80 132 Z"
+                fill="#0f1f38" stroke="rgba(0,229,176,0.2)" stroke-width="1.5"/>
+              <path d="M 120 168 L 100 185 L 108 200 L 135 204 L 165 202 L 200 200" fill="rgba(59,139,255,0.06)" stroke="rgba(59,139,255,0.2)" stroke-width="0.8"/>
+              <g id="city-dots"></g>
+            </svg>
+          </div>
+          <div id="city-bars"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Recent Deals</div>
+            <div class="card-sub" id="deals-label">loading...</div>
+          </div>
+          <div style="overflow-y:auto;max-height:300px">
+            <table class="deals-table">
+              <thead><tr>
+                <th>Customer</th><th>Product</th>
+                <th>Recv.</th><th>Profit</th><th>Status</th>
+              </tr></thead>
+              <tbody id="deals-tbody"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="mid-row">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Profit Trend</div></div>
+          <div class="chart-wrap"><canvas id="profitChart" role="img" aria-label="Profit trend chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Financial Summary</div><div class="card-sub">Pre-sale model</div></div>
+          <div id="fin-summary" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPLIERS TAB -->
+    <div id="tab-suppliers" style="display:none">
+      <div id="suppliers-list"></div>
+    </div>
+
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel">
+    <div class="side-section-title">Customers (<span id="cust-count">0</span>)</div>
+    <input class="search-box" placeholder="Search name or city..." id="search-input" oninput="renderCustomers()">
+    <div id="customer-list"><div class="loading">Loading...</div></div>
+  </div>
+</div>
+
+<!-- CUSTOMER MODAL -->
+<div class="modal-bg" id="customer-modal">
+  <div class="modal">
+    <div class="modal-title">New Customer</div>
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input class="form-input" id="c-name" placeholder="e.g. Ahmad Rezaei">
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">City (Iran)</label>
+        <select class="form-input" id="c-city">
+          <option>Tehran</option><option>Isfahan</option><option>Mashhad</option>
+          <option>Shiraz</option><option>Tabriz</option><option>Ahvaz</option>
+          <option>Karaj</option><option>Qom</option><option>Kermanshah</option>
+          <option>Rasht</option><option>Urmia</option><option>Hamadan</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input class="form-input" id="c-phone" placeholder="+98...">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-input" id="c-type">
+        <option>Wholesale Buyer</option><option>Retail</option><option>Individual</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="c-notes" placeholder="Optional notes...">
+    </div>
+    <div class="form-row">
+      <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+      <button class="btn btn-green" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPLIER MODAL -->
+<div class="modal-bg" id="supplier-modal">
+  <div class="modal">
+    <div class="modal-title">New Supplier</div>
+    <div class="form-group">
+      <label class="form-label">Supplier Name</label>
+      <input class="form-input" id="s-name" placeholder="e.g. Ahmad Mobile Sharjah">
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input class="form-input" id="s-whatsapp" placeholder="+971...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="s-location" value="Sharjah">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Speciality (comma separated)</label>
+      <input class="form-input" id="s-speciality" placeholder="iPhone, Samsung, Laptop">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Rating (1-5)</label>
+      <select class="form-input" id="s-rating">
+        <option value="5">5 ★★★★★</option><option value="4">4 ★★★★</option>
+        <option value="3">3 ★★★</option><option value="2">2 ★★</option><option value="1">1 ★</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="s-notes" placeholder="Optional...">
+    </div>
+    <div class="form-row">
+      <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+      <button class="btn btn-blue" onclick="saveSupplier()">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEAL MODAL -->
+<div class="modal-bg" id="deal-modal">
+  <div class="modal">
+    <div class="modal-title">New Deal</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Customer</label>
+        <select class="form-input" id="d-customer"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Supplier</label>
+        <select class="form-input" id="d-supplier"></select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Product / Item</label>
+      <input class="form-input" id="d-product" placeholder="e.g. iPhone 15 Pro 256GB x2">
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Received from Customer (AED)</label>
+        <input class="form-input" id="d-received" type="number" placeholder="0" oninput="calcProfit()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Purchase Cost (AED)</label>
+        <input class="form-input" id="d-cost" type="number" placeholder="0" oninput="calcProfit()">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Shipping (AED)</label>
+      <input class="form-input" id="d-shipping" type="number" placeholder="0" oninput="calcProfit()">
+    </div>
+    <div class="profit-preview">
+      <div class="pp-row">
+        <div class="pp-item"><div class="pp-val c-acc" id="pp-recv">0</div><div class="pp-lbl">Received</div></div>
+        <div class="pp-arrow">−</div>
+        <div class="pp-item"><div class="pp-val c-acc3" id="pp-cost">0</div><div class="pp-lbl">Cost+Ship</div></div>
+        <div class="pp-arrow">=</div>
+        <div class="pp-item"><div class="pp-val c-acc2" id="pp-margin">0%</div><div class="pp-lbl">Margin</div></div>
+      </div>
+      <div class="pp-result">
+        <div class="pp-big" id="pp-profit">AED 0</div>
+        <div class="pp-sub">Net Profit — Zero Capital Risk</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-input" id="d-status">
+        <option value="pending">Pending Payment</option>
+        <option value="paid">Paid — In Transit</option>
+        <option value="delivered">Delivered</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="d-notes" placeholder="Optional...">
+    </div>
+    <div class="form-row">
+      <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+      <button class="btn btn-green" onclick="saveDeal()">Save Deal</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── SUPABASE ─────────────────────────────────────────────────
+const SUPABASE_URL = 'https://gwjdsgpchzdphywfgype.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_xqwVqXxp-KnqR6GGjO3nKw_VOvIKcut';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ─── STATE ────────────────────────────────────────────────────
+let customers = [], suppliers = [], deals = [];
+
+const CITY_COORDS = {
+  Tehran:    {x:222,y:105,color:'#00e5b0'},
+  Isfahan:   {x:212,y:148,color:'#3b8bff'},
+  Mashhad:   {x:352,y:85, color:'#f5a623'},
+  Shiraz:    {x:210,y:178,color:'#ff4d6d'},
+  Tabriz:    {x:120,y:78, color:'#a78bfa'},
+  Ahvaz:     {x:148,y:162,color:'#22d3ee'},
+  Karaj:     {x:204,y:100,color:'#00e5b0'},
+  Qom:       {x:220,y:126,color:'#3b8bff'},
+  Kermanshah:{x:136,y:124,color:'#f5a623'},
+  Rasht:     {x:168,y:75, color:'#a78bfa'},
+  Urmia:     {x:100,y:88, color:'#22d3ee'},
+  Hamadan:   {x:158,y:120,color:'#00e5b0'},
+  Other:     {x:258,y:145,color:'#94a3b8'},
+};
+
+// ─── CLOCK ────────────────────────────────────────────────────
+setInterval(()=>{
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+},1000);
+
+// ─── TOAST ────────────────────────────────────────────────────
+function toast(msg,isErr=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.style.color=isErr?'var(--acc4)':'var(--acc)';
+  el.style.borderColor=isErr?'rgba(255,77,109,0.3)':'rgba(0,229,176,0.3)';
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ─── LOAD DATA ────────────────────────────────────────────────
+async function loadAll(){
+  try{
+    const [c,s,d] = await Promise.all([
+      db.from('customers').select('*').order('created_at',{ascending:false}),
+      db.from('suppliers').select('*').order('created_at',{ascending:false}),
+      db.from('deals').select('*').order('created_at',{ascending:false}),
+    ]);
+    if(c.error)throw c.error;
+    if(s.error)throw s.error;
+    if(d.error)throw d.error;
+    customers=c.data||[];
+    suppliers=s.data||[];
+    deals=d.data||[];
+    document.getElementById('sync-label').textContent='Live';
+    renderAll();
+  }catch(e){
+    document.getElementById('sync-label').textContent='Error';
+    toast('Connection error: '+e.message,true);
+  }
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────
+function getCustomer(id){return customers.find(c=>c.id===id)||{name:'Unknown',city:'—'}}
+function getSupplier(id){return suppliers.find(s=>s.id===id)||{name:'—'}}
+function dealProfit(d){return(d.profit_aed!==null&&d.profit_aed!==undefined)?Number(d.profit_aed):(d.received_aed-d.cost_aed-d.shipping_aed)}
+function fmtAED(n){return'AED '+(+n||0).toLocaleString(undefined,{maximumFractionDigits:0})}
+
+function getCityCounts(){
+  const map={};
+  customers.forEach(c=>{map[c.city]=(map[c.city]||0)+1});
+  return Object.entries(map).map(([city,count])=>({city,count})).sort((a,b)=>b.count-a.count);
+}
+function getCityRevenue(city){
+  const ids=customers.filter(c=>c.city===city).map(c=>c.id);
+  return deals.filter(d=>ids.includes(d.customer_id)).reduce((s,d)=>s+Number(d.received_aed),0);
+}
+
+// ─── METRICS ─────────────────────────────────────────────────
+function renderMetrics(){
+  const totalRecv=deals.reduce((s,d)=>s+Number(d.received_aed),0);
+  const totalCost=deals.reduce((s,d)=>s+Number(d.cost_aed)+Number(d.shipping_aed),0);
+  const totalProfit=deals.reduce((s,d)=>s+dealProfit(d),0);
+  const pending=deals.filter(d=>d.status==='pending').reduce((s,d)=>s+Number(d.received_aed),0);
+  const margin=totalRecv>0?(totalProfit/totalRecv*100).toFixed(1):0;
+
+  document.getElementById('metrics-row').innerHTML=[
+    {label:'Total Received',val:fmtAED(totalRecv),sub:`${deals.length} deals · avg ${margin}% margin`,badge:'PRE-SALE MODEL',bc:'mb-info',col:'c-acc2',lc:'var(--acc2)'},
+    {label:'Purchase Cost',val:fmtAED(totalCost),sub:'Paid after receiving',badge:'ZERO CAPITAL RISK',bc:'mb-up',col:'c-acc3',lc:'var(--acc3)'},
+    {label:'Net Profit',val:fmtAED(totalProfit),sub:`${customers.length} customers · ${suppliers.length} suppliers`,badge:'+'+margin+'% MARGIN',bc:'mb-up',col:'c-acc',lc:'var(--acc)'},
+    {label:'Pending',val:fmtAED(pending),sub:`${deals.filter(d=>d.status==='pending').length} open invoices`,badge:'NEEDS ACTION',bc:'mb-down',col:'c-acc4',lc:'var(--acc4)'},
+  ].map(m=>`<div class="metric">
+    <div class="metric-label">${m.label}</div>
+    <div class="metric-val ${m.col}">${m.val}</div>
+    <div class="metric-sub">${m.sub}</div>
+    <div class="metric-badge ${m.bc}">${m.badge}</div>
+    <div class="metric-line" style="background:${m.lc};opacity:.4"></div>
+  </div>`).join('');
+
+  const cities=getCityCounts().length;
+  document.getElementById('fin-summary').innerHTML=`
+    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">CAPITAL AT RISK</div>
+      <div style="font-size:20px;font-weight:600;color:var(--acc)">AED 0</div>
+      <div style="font-size:10px;color:var(--acc);margin-top:2px">Customer pays first</div>
+    </div>
+    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">NET PROFIT</div>
+      <div style="font-size:20px;font-weight:600;color:var(--acc2)">${fmtAED(totalProfit)}</div>
+      <div style="font-size:10px;color:var(--acc2);margin-top:2px">${margin}% avg margin</div>
+    </div>
+    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">CUSTOMERS</div>
+      <div style="font-size:20px;font-weight:600;color:var(--acc3)">${customers.length}</div>
+      <div style="font-size:10px;color:var(--acc3);margin-top:2px">active accounts</div>
+    </div>
+    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
+      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">CITIES</div>
+      <div style="font-size:20px;font-weight:600;color:var(--acc4)">${cities}</div>
+      <div style="font-size:10px;color:var(--acc4);margin-top:2px">across Iran</div>
+    </div>`;
+}
+
+// ─── MAP ─────────────────────────────────────────────────────
+function renderMap(){
+  const cities=getCityCounts();
+  const total=customers.length||1;
+  const totalRev=deals.reduce((s,d)=>s+Number(d.received_aed),0)||1;
+  document.getElementById('map-label').textContent=`${customers.length} customers · ${cities.length} cities`;
+  const g=document.getElementById('city-dots');
+  g.innerHTML='';
+  cities.forEach(({city,count})=>{
+    const c=CITY_COORDS[city]||CITY_COORDS.Other;
+    const r=Math.max(7,Math.min(18,7+count*3));
+    const el=document.createElementNS('http://www.w3.org/2000/svg','g');
+    el.innerHTML=`
+      <circle cx="${c.x}" cy="${c.y}" r="${r+5}" fill="${c.color}" opacity="0.07"/>
+      <circle cx="${c.x}" cy="${c.y}" r="${r}" fill="${c.color}" opacity="0.85">
+        <animate attributeName="r" values="${r};${r+2};${r}" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.85;0.55;0.85" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text x="${c.x}" y="${c.y+1}" text-anchor="middle" dominant-baseline="central"
+        font-family="DM Mono,monospace" font-size="9" font-weight="500" fill="#000">${count}</text>
+      <text x="${c.x+r+5}" y="${c.y-3}" font-family="DM Mono,monospace" font-size="8.5" fill="#8896b0">${city}</text>`;
+    g.appendChild(el);
+  });
+  const maxRev=Math.max(...cities.map(c=>getCityRevenue(c.city)),1);
+  document.getElementById('city-bars').innerHTML=cities.slice(0,6).map(({city,count})=>{
+    const rev=getCityRevenue(city);
+    const coord=CITY_COORDS[city]||CITY_COORDS.Other;
+    return `<div class="city-bar-row">
+      <div class="cbr-name">${city}</div>
+      <div class="cbr-track"><div class="cbr-fill" style="width:${Math.round(rev/maxRev*100)}%;background:${coord.color}"></div></div>
+      <div class="cbr-val" style="color:${coord.color}">${rev>0?fmtAED(rev):'—'}</div>
+      <div class="cbr-cnt">${count}c</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── DEALS TABLE ──────────────────────────────────────────────
+function renderDeals(){
+  document.getElementById('deals-label').textContent=`${deals.length} deals`;
+  const smap={pending:'sp-pending',paid:'sp-transit',delivered:'sp-delivered',in_transit:'sp-transit',cancelled:'sp-transit'};
+  const slbl={pending:'Pending',paid:'In Transit',delivered:'Delivered',in_transit:'In Transit',cancelled:'Cancelled'};
+  document.getElementById('deals-tbody').innerHTML=deals.slice(0,20).map(d=>{
+    const cust=getCustomer(d.customer_id);
+    const profit=dealProfit(d);
+    return `<tr>
+      <td><div style="font-weight:500;color:var(--t1)">${cust.name}</div><div style="font-size:10px;color:var(--t3)">${cust.city}</div></td>
+      <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.product}</td>
+      <td style="color:var(--acc)">${(+d.received_aed||0).toLocaleString()}</td>
+      <td style="color:${profit>=0?'var(--acc)':'var(--acc4)'};font-weight:500">${profit.toLocaleString(undefined,{maximumFractionDigits:0})}</td>
+      <td><span class="sp ${smap[d.status]||'sp-pending'}">${slbl[d.status]||d.status}</span></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="5" class="empty">No deals yet. Click + Deal to add.</td></tr>';
+}
+
+// ─── CUSTOMERS SIDEBAR ────────────────────────────────────────
+function renderCustomers(){
+  const q=(document.getElementById('search-input').value||'').toLowerCase();
+  const filtered=customers.filter(c=>c.name.toLowerCase().includes(q)||c.city.toLowerCase().includes(q));
+  document.getElementById('cust-count').textContent=customers.length;
+  document.getElementById('customer-list').innerHTML=filtered.map(c=>{
+    const cd=deals.filter(d=>d.customer_id===c.id);
+    const rev=cd.reduce((s,d)=>s+Number(d.received_aed),0);
+    const profit=cd.reduce((s,d)=>s+dealProfit(d),0);
+    return `<div class="cust-card">
+      <div class="cust-name">${c.name}</div>
+      <div class="cust-meta"><span class="city-tag">${c.city}</span><span>${c.type}</span></div>
+      <div class="cust-stats">
+        <div class="cs-item"><div class="cs-val c-acc">${cd.length}</div><div class="cs-lbl">Deals</div></div>
+        <div class="cs-item"><div class="cs-val c-acc2" style="font-size:10px">${rev>0?fmtAED(rev):'—'}</div><div class="cs-lbl">Revenue</div></div>
+        <div class="cs-item"><div class="cs-val ${profit>=0?'c-acc':'c-acc4'}" style="font-size:10px">${profit>0?'+'+Math.round(profit):'0'}</div><div class="cs-lbl">Profit</div></div>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty">No customers found</div>';
+}
+
+// ─── SUPPLIERS TAB ────────────────────────────────────────────
+function renderSuppliers(){
+  document.getElementById('suppliers-list').innerHTML=suppliers.length?
+    suppliers.map(s=>`<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div class="card-title">${s.name}</div>
+        <span class="sp sp-transit">${s.active?'Active':'Inactive'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--t2);margin-bottom:4px">${s.whatsapp||'—'} · ${s.location}</div>
+      <div class="sup-tags">${(s.speciality||[]).map(t=>`<span class="sup-tag">${t}</span>`).join('')}</div>
+      <div class="rating-stars">${'★'.repeat(s.rating||0)}${'☆'.repeat(5-(s.rating||0))}</div>
+      ${s.notes?`<div style="font-size:11px;color:var(--t3);margin-top:6px">${s.notes}</div>`:''}
+    </div>`).join(''):
+    '<div class="empty" style="margin-top:40px">No suppliers yet. Click + Supplier to add.</div>';
+}
+
+// ─── CHART ────────────────────────────────────────────────────
+let chart;
+function renderChart(){
+  const ctx=document.getElementById('profitChart').getContext('2d');
+  const now=new Date();
+  const labels=[];const data=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    labels.push(d.toLocaleString('en',{month:'short'}));
+    const profit=deals.filter(dl=>{
+      const dd=new Date(dl.created_at);
+      return dd.getMonth()===d.getMonth()&&dd.getFullYear()===d.getFullYear();
+    }).reduce((s,dl)=>s+dealProfit(dl),0);
+    data.push(Math.round(profit));
+  }
+  if(chart)chart.destroy();
+  chart=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{data,borderColor:'#00e5b0',backgroundColor:'rgba(0,229,176,0.06)',fill:true,tension:.4,pointBackgroundColor:'#00e5b0',pointRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3d5070',font:{size:10}}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3d5070',font:{size:10},callback:v=>v>=1000?Math.round(v/1000)+'K':v}}
+      }}
+  });
+}
+
+// ─── TABS ────────────────────────────────────────────────────
+function setTab(tab,el){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-overview').style.display=tab==='overview'?'flex':'none';
+  document.getElementById('tab-overview').style.flexDirection='column';
+  document.getElementById('tab-overview').style.gap='10px';
+  document.getElementById('tab-suppliers').style.display=tab==='suppliers'?'block':'none';
+  if(tab==='suppliers')renderSuppliers();
+}
+
+// ─── MODALS ──────────────────────────────────────────────────
+function openModal(id){
+  if(id==='deal-modal'){
+    document.getElementById('d-customer').innerHTML=customers.map(c=>`<option value="${c.id}">${c.name} (${c.city})</option>`).join('')||'<option>No customers yet</option>';
+    document.getElementById('d-supplier').innerHTML=suppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')||'<option>No suppliers yet</option>';
+    calcProfit();
+  }
+  document.getElementById(id).classList.add('open');
+}
+function closeModals(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'));}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals()}));
+
+function calcProfit(){
+  const recv=parseFloat(document.getElementById('d-received').value)||0;
+  const cost=parseFloat(document.getElementById('d-cost').value)||0;
+  const ship=parseFloat(document.getElementById('d-shipping').value)||0;
+  const profit=recv-(cost+ship);
+  const margin=recv>0?(profit/recv*100).toFixed(1):0;
+  document.getElementById('pp-recv').textContent=recv.toLocaleString();
+  document.getElementById('pp-cost').textContent=(cost+ship).toLocaleString();
+  document.getElementById('pp-margin').textContent=margin+'%';
+  document.getElementById('pp-profit').textContent='AED '+profit.toLocaleString(undefined,{maximumFractionDigits:0});
+  document.getElementById('pp-profit').style.color=profit>=0?'var(--acc)':'var(--acc4)';
+}
+
+// ─── SAVE FUNCTIONS ───────────────────────────────────────────
+async function saveCustomer(){
+  const name=document.getElementById('c-name').value.trim();
+  if(!name){toast('Please enter customer name',true);return;}
+  const {error}=await db.from('customers').insert({
+    name,city:document.getElementById('c-city').value,
+    phone:document.getElementById('c-phone').value,
+    whatsapp:document.getElementById('c-phone').value,
+    type:document.getElementById('c-type').value,
+    notes:document.getElementById('c-notes').value,
+  });
+  if(error){toast('Error: '+error.message,true);return;}
+  toast('Customer saved!');closeModals();
+  document.getElementById('c-name').value='';document.getElementById('c-phone').value='';document.getElementById('c-notes').value='';
+  await loadAll();
+}
+
+async function saveSupplier(){
+  const name=document.getElementById('s-name').value.trim();
+  if(!name){toast('Please enter supplier name',true);return;}
+  const spec=document.getElementById('s-speciality').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const {error}=await db.from('suppliers').insert({
+    name,whatsapp:document.getElementById('s-whatsapp').value,
+    location:document.getElementById('s-location').value,
+    speciality:spec,rating:parseInt(document.getElementById('s-rating').value),
+    notes:document.getElementById('s-notes').value,
+  });
+  if(error){toast('Error: '+error.message,true);return;}
+  toast('Supplier saved!');closeModals();
+  document.getElementById('s-name').value='';document.getElementById('s-whatsapp').value='';document.getElementById('s-speciality').value='';document.getElementById('s-notes').value='';
+  await loadAll();
+}
+
+async function saveDeal(){
+  const product=document.getElementById('d-product').value.trim();
+  const recv=parseFloat(document.getElementById('d-received').value)||0;
+  if(!product||recv===0){toast('Please fill product and received amount',true);return;}
+  const custId=document.getElementById('d-customer').value;
+  const supId=document.getElementById('d-supplier').value;
+  const {error}=await db.from('deals').insert({
+    customer_id:custId||null,supplier_id:supId||null,
+    product,received_aed:recv,
+    cost_aed:parseFloat(document.getElementById('d-cost').value)||0,
+    shipping_aed:parseFloat(document.getElementById('d-shipping').value)||0,
+    status:document.getElementById('d-status').value,
+    notes:document.getElementById('d-notes').value,
+  });
+  if(error){toast('Error: '+error.message,true);return;}
+  toast('Deal saved!');closeModals();
+  document.getElementById('d-product').value='';document.getElementById('d-received').value='';
+  document.getElementById('d-cost').value='';document.getElementById('d-shipping').value='';document.getElementById('d-notes').value='';
+  await loadAll();
+}
+
+// ─── RENDER ALL ───────────────────────────────────────────────
+function renderAll(){
+  renderMetrics();renderMap();renderDeals();renderCustomers();renderChart();
+}
+
+// ─── REALTIME ────────────────────────────────────────────────
+db.channel('changes')
+  .on('postgres_changes',{event:'*',schema:'public'},()=>loadAll())
+  .subscribe();
+
+// ─── INIT ────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
