@@ -8,147 +8,157 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --bg0:#03080f;--bg1:#070e1a;--bg2:#0c1626;--bg3:#111e33;
-  --acc:#00e5b0;--acc2:#3b8bff;--acc3:#f5a623;--acc4:#ff4d6d;
-  --t1:#e8edf5;--t2:#8896b0;--t3:#3d5070;
-  --border:rgba(255,255,255,0.06);
-  --font-head:'Syne',sans-serif;
-  --font-mono:'DM Mono',monospace;
-}
+:root{--bg0:#03080f;--bg1:#070e1a;--bg2:#0c1626;--bg3:#111e33;--acc:#00e5b0;--acc2:#3b8bff;--acc3:#f5a623;--acc4:#ff4d6d;--t1:#e8edf5;--t2:#8896b0;--t3:#3d5070;--border:rgba(255,255,255,0.06);--fh:'Syne',sans-serif;--fm:'DM Mono',monospace}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{font-family:var(--font-mono);background:var(--bg0);color:var(--t1);display:flex;flex-direction:column}
-
-.topbar{height:52px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;z-index:100}
-.logo{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--acc);letter-spacing:-0.5px}
-.logo span{color:var(--t2);font-weight:400;font-size:12px;margin-right:8px}
+body{font-family:var(--fm);background:var(--bg0);color:var(--t1);display:flex;flex-direction:column}
+.topbar{height:52px;background:var(--bg1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;z-index:100}
+.logo{font-family:var(--fh);font-size:17px;font-weight:800;color:var(--acc);letter-spacing:-.5px;white-space:nowrap}
+.logo span{color:var(--t2);font-weight:400;font-size:11px;margin-right:6px}
 .nav-tabs{display:flex;gap:2px;margin-right:auto}
-.nav-tab{padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--t2);transition:.2s;font-family:var(--font-mono)}
+.nav-tab{padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;color:var(--t2);transition:.2s;font-family:var(--fm)}
 .nav-tab:hover{color:var(--t1);background:var(--bg3)}
 .nav-tab.active{color:var(--acc);background:rgba(0,229,176,0.1)}
-.topbar-right{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--t3)}
-.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,229,176,0.08);border:1px solid rgba(0,229,176,0.2);border-radius:20px;padding:4px 10px;color:var(--acc);font-size:11px}
+.tr{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t3)}
+.live-pill{display:flex;align-items:center;gap:5px;background:rgba(0,229,176,0.08);border:1px solid rgba(0,229,176,0.2);border-radius:20px;padding:3px 10px;color:var(--acc);font-size:11px}
 .live-dot{width:6px;height:6px;background:var(--acc);border-radius:50%;animation:blink 1.5s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.btn{border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-family:var(--font-mono);font-weight:500;cursor:pointer;transition:.2s}
+.btn{border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-family:var(--fm);font-weight:500;cursor:pointer;transition:.2s;white-space:nowrap}
 .btn-green{background:var(--acc);color:#000}.btn-green:hover{opacity:.85}
 .btn-blue{background:var(--acc2);color:#fff}.btn-blue:hover{opacity:.85}
+.btn-amber{background:var(--acc3);color:#000}.btn-amber:hover{opacity:.85}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--t2)}.btn-outline:hover{background:var(--bg3);color:var(--t1)}
-
-.content{flex:1;display:grid;grid-template-columns:1fr 300px;overflow:hidden}
-.main-panel{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.side-panel{background:var(--bg1);border-right:1px solid var(--border);overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-
+.btn-sm{padding:4px 10px;font-size:10px}
+.content{flex:1;display:grid;grid-template-columns:1fr 290px;overflow:hidden}
+.main-panel{overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.side-panel{background:var(--bg1);border-right:1px solid var(--border);overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.metric{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden}
-.metric-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-.metric-val{font-size:22px;font-weight:500;line-height:1;margin-bottom:4px}
-.metric-sub{font-size:11px;color:var(--t2)}
-.metric-badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;margin-top:5px}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 13px;position:relative;overflow:hidden}
+.metric-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.metric-val{font-size:20px;font-weight:500;line-height:1;margin-bottom:4px}
+.metric-sub{font-size:10px;color:var(--t2)}
+.metric-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:4px;margin-top:5px}
 .mb-up{background:rgba(0,229,176,0.1);color:var(--acc)}
-.mb-warn{background:rgba(245,166,35,0.1);color:var(--acc3)}
 .mb-down{background:rgba(255,77,109,0.1);color:var(--acc4)}
 .mb-info{background:rgba(59,139,255,0.1);color:var(--acc2)}
-.c-acc{color:var(--acc)}.c-acc2{color:var(--acc2)}.c-acc3{color:var(--acc3)}.c-acc4{color:var(--acc4)}
+.mb-warn{background:rgba(245,166,35,0.1);color:var(--acc3)}
 .metric-line{position:absolute;bottom:0;left:0;right:0;height:2px}
-
+.c-acc{color:var(--acc)}.c-acc2{color:var(--acc2)}.c-acc3{color:var(--acc3)}.c-acc4{color:var(--acc4)}
 .mid-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
 .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.card-title{font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--t1)}
+.card-title{font-family:var(--fh);font-size:12px;font-weight:600;color:var(--t1)}
 .card-sub{font-size:10px;color:var(--t3)}
-
-.map-container{background:var(--bg0);border-radius:8px;overflow:hidden;margin-bottom:8px}
-.iran-svg{width:100%;display:block}
-
-.deals-table{width:100%;border-collapse:collapse;font-size:11px}
-.deals-table th{text-align:left;color:var(--t3);font-size:10px;padding:4px 8px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;font-weight:400}
-.deals-table td{padding:7px 8px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle}
-.deals-table tr:last-child td{border-bottom:none}
-.deals-table tr:hover td{background:rgba(255,255,255,0.02)}
-.sp{font-size:10px;padding:2px 8px;border-radius:4px;white-space:nowrap}
-.sp-paid{background:rgba(0,229,176,0.1);color:var(--acc)}
-.sp-transit{background:rgba(245,166,35,0.1);color:var(--acc3)}
-.sp-pending{background:rgba(59,139,255,0.1);color:var(--acc2)}
-.sp-delivered{background:rgba(0,229,176,0.15);color:var(--acc)}
-
-.search-box{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--t1);font-family:var(--font-mono);font-size:12px;outline:none}
+.tbl{width:100%;border-collapse:collapse;font-size:11px}
+.tbl th{text-align:left;color:var(--t3);font-size:10px;padding:4px 7px;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;font-weight:400}
+.tbl td{padding:7px 7px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,0.02);cursor:pointer}
+.sp{font-size:10px;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.sp-green{background:rgba(0,229,176,0.1);color:var(--acc)}
+.sp-amber{background:rgba(245,166,35,0.1);color:var(--acc3)}
+.sp-blue{background:rgba(59,139,255,0.1);color:var(--acc2)}
+.sp-red{background:rgba(255,77,109,0.1);color:var(--acc4)}
+.search-box{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:7px 11px;color:var(--t1);font-family:var(--fm);font-size:12px;outline:none}
 .search-box:focus{border-color:rgba(0,229,176,0.3)}
 .search-box::placeholder{color:var(--t3)}
-
-.cust-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:.2s}
-.cust-card:hover{border-color:rgba(0,229,176,0.2)}
-.cust-name{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px}
-.cust-meta{font-size:10px;color:var(--t3);display:flex;gap:6px;flex-wrap:wrap}
+.cust-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:5px;cursor:pointer;transition:.2s}
+.cust-card:hover{border-color:rgba(0,229,176,0.25);background:var(--bg3)}
+.cust-card.active-c{border-color:rgba(0,229,176,0.5)}
+.cust-name{font-size:12px;font-weight:500;color:var(--t1);margin-bottom:2px}
+.cust-meta{font-size:10px;color:var(--t3);display:flex;gap:5px;flex-wrap:wrap}
 .city-tag{background:var(--bg3);border-radius:3px;padding:1px 5px;color:var(--t2)}
-.cust-stats{display:flex;gap:6px;margin-top:6px}
+.cust-stats{display:flex;gap:5px;margin-top:5px}
 .cs-item{flex:1;text-align:center;background:var(--bg0);border-radius:5px;padding:4px}
-.cs-val{font-size:12px;font-weight:500}
+.cs-val{font-size:11px;font-weight:500}
 .cs-lbl{font-size:9px;color:var(--t3);margin-top:1px}
-
-.city-bar-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px}
+.city-bar-row{display:flex;align-items:center;gap:7px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px}
 .city-bar-row:last-child{border-bottom:none}
-.cbr-name{width:80px;color:var(--t2);font-size:10px}
+.cbr-name{width:75px;color:var(--t2);font-size:10px}
 .cbr-track{flex:1;height:4px;background:var(--bg0);border-radius:2px;overflow:hidden}
 .cbr-fill{height:100%;border-radius:2px;transition:width .8s ease}
-.cbr-val{width:55px;text-align:right;font-size:10px;color:var(--t2)}
-.cbr-cnt{width:30px;text-align:right;font-size:10px;color:var(--t3)}
-
-.chart-wrap{position:relative;height:100px}
-
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
+.cbr-val{width:60px;text-align:right;font-size:10px;color:var(--t2)}
+.cbr-cnt{width:28px;text-align:right;font-size:10px;color:var(--t3)}
+.chart-wrap{position:relative;height:90px}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
 .modal-bg.open{opacity:1;pointer-events:all}
-.modal{background:var(--bg2);border:1px solid rgba(0,229,176,0.2);border-radius:14px;padding:22px;width:440px;max-height:90vh;overflow-y:auto}
-.modal-title{font-family:var(--font-head);font-size:17px;font-weight:700;margin-bottom:18px;color:var(--acc)}
-.form-group{margin-bottom:12px}
-.form-label{font-size:10px;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
-.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--t1);font-family:var(--font-mono);font-size:13px;outline:none;transition:.2s}
-.form-input:focus{border-color:rgba(0,229,176,0.4)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.form-row{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
-select.form-input option{background:var(--bg2)}
-
-.profit-preview{background:var(--bg0);border-radius:8px;padding:12px;margin:12px 0}
-.pp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.pp-item{text-align:center}
-.pp-val{font-size:16px;font-weight:600;margin-bottom:2px}
-.pp-lbl{font-size:9px;color:var(--t3)}
-.pp-arrow{color:var(--t3);font-size:16px}
-.pp-result{background:rgba(0,229,176,0.08);border:1px solid rgba(0,229,176,0.2);border-radius:6px;padding:10px;text-align:center;margin-top:8px}
-.pp-big{font-size:24px;font-weight:600;color:var(--acc)}
-.pp-sub{font-size:10px;color:var(--t2);margin-top:3px}
-
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid rgba(0,229,176,0.3);border-radius:8px;padding:10px 20px;font-size:13px;color:var(--acc);z-index:999;opacity:0;transition:.3s;pointer-events:none}
+.modal{background:var(--bg2);border:1px solid rgba(0,229,176,0.2);border-radius:14px;padding:20px;width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:var(--fh);font-size:16px;font-weight:700;margin-bottom:16px;color:var(--acc)}
+.fg{margin-bottom:11px}
+.fl{font-size:10px;color:var(--t2);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.fi{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 11px;color:var(--t1);font-family:var(--fm);font-size:12px;outline:none;transition:.2s}
+.fi:focus{border-color:rgba(0,229,176,0.4)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.form-row{display:flex;gap:8px;margin-top:14px;justify-content:flex-end}
+select.fi option{background:var(--bg2)}
+.profit-box{background:var(--bg0);border-radius:8px;padding:11px;margin:10px 0}
+.pb-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.pb-item{text-align:center}
+.pb-val{font-size:15px;font-weight:600;margin-bottom:2px}
+.pb-lbl{font-size:9px;color:var(--t3)}
+.pb-arrow{color:var(--t3);font-size:15px}
+.pb-result{background:rgba(0,229,176,0.08);border:1px solid rgba(0,229,176,0.2);border-radius:6px;padding:9px;text-align:center;margin-top:7px}
+.pb-big{font-size:22px;font-weight:600;color:var(--acc)}
+.pb-sub{font-size:10px;color:var(--t2);margin-top:2px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid rgba(0,229,176,0.3);border-radius:8px;padding:9px 18px;font-size:12px;color:var(--acc);z-index:999;opacity:0;transition:.3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
-
-.loading{display:flex;align-items:center;justify-content:center;height:60px;color:var(--t3);font-size:12px}
-.empty{text-align:center;padding:20px;color:var(--t3);font-size:12px}
-
-.side-section-title{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-
-.sup-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px}
-.sup-name{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:3px}
-.sup-meta{font-size:10px;color:var(--t3)}
-.sup-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
-.sup-tag{font-size:10px;background:rgba(245,166,35,0.1);color:var(--acc3);padding:2px 6px;border-radius:3px}
-.rating-stars{color:var(--acc3);font-size:11px;margin-top:3px}
+.loading{display:flex;align-items:center;justify-content:center;height:50px;color:var(--t3);font-size:11px}
+.empty{text-align:center;padding:16px;color:var(--t3);font-size:11px}
+.inv-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:6px}
+.inv-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.inv-no{font-size:13px;font-weight:600;color:var(--acc);font-family:var(--fh)}
+.inv-date{font-size:10px;color:var(--t3)}
+.inv-body{font-size:11px;color:var(--t2);line-height:1.7}
+.inv-total{background:var(--bg0);border-radius:6px;padding:8px;margin-top:8px;display:flex;justify-content:space-between;align-items:center}
+.inv-total-label{font-size:11px;color:var(--t2)}
+.inv-total-val{font-size:16px;font-weight:600;color:var(--acc)}
+.inv-profit{font-size:11px;color:var(--acc2);text-align:right;margin-top:2px}
+.customer-detail{background:var(--bg2);border:1px solid rgba(0,229,176,0.2);border-radius:10px;padding:14px;margin-bottom:10px}
+.cd-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.cd-avatar{width:40px;height:40px;border-radius:50%;background:rgba(0,229,176,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--acc);font-family:var(--fh);flex-shrink:0}
+.cd-name{font-size:15px;font-weight:600;color:var(--t1);font-family:var(--fh)}
+.cd-meta{font-size:11px;color:var(--t3)}
+.cd-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
+.cd-stat{background:var(--bg0);border-radius:6px;padding:8px;text-align:center}
+.cd-stat-val{font-size:14px;font-weight:600;margin-bottom:2px}
+.cd-stat-lbl{font-size:9px;color:var(--t3)}
+.section-title{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;margin-top:12px}
+.inv-list-item{background:var(--bg0);border-radius:6px;padding:8px 10px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;font-size:11px}
+.ili-left{flex:1}
+.ili-no{font-weight:500;color:var(--acc);margin-bottom:2px}
+.ili-product{color:var(--t2)}
+.ili-right{text-align:right}
+.ili-amount{font-weight:600;color:var(--t1)}
+.ili-date{font-size:10px;color:var(--t3);margin-top:1px}
+.po-item{background:var(--bg0);border-radius:6px;padding:8px 10px;margin-bottom:5px;font-size:11px}
+.po-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.po-supplier{color:var(--acc3);font-weight:500}
+.po-amount{font-weight:600;color:var(--t1)}
+.po-detail{color:var(--t2)}
+.iran-map{width:100%;display:block}
+.side-sec-title{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
+.inv-form-item{background:var(--bg3);border-radius:6px;padding:8px 10px;margin-bottom:5px;display:flex;gap:8px;align-items:center;font-size:11px}
+.inv-form-item input{background:var(--bg0);border:1px solid var(--border);border-radius:4px;padding:4px 7px;color:var(--t1);font-family:var(--fm);font-size:11px;outline:none;width:70px}
+.inv-form-item input:focus{border-color:rgba(0,229,176,0.3)}
 </style>
 </head>
 <body>
-
 <div class="topbar">
   <div class="logo">ALFATEL <span>// Sharjah → Iran</span></div>
   <div class="nav-tabs">
     <div class="nav-tab active" onclick="setTab('overview',this)">Overview</div>
-    <div class="nav-tab" onclick="setTab('suppliers',this)">Suppliers</div>
+    <div class="nav-tab" onclick="setTab('inventory',this)">Inventory</div>
+    <div class="nav-tab" onclick="setTab('deals',this)">Deals</div>
+    <div class="nav-tab" onclick="setTab('invoices',this)">Invoices</div>
   </div>
-  <div class="topbar-right">
+  <div class="tr">
     <div class="live-pill"><span class="live-dot"></span><span id="sync-label">Syncing...</span></div>
     <div id="clock">--:--</div>
-    <button class="btn btn-blue" onclick="openModal('supplier-modal')">+ Supplier</button>
-    <button class="btn btn-outline" onclick="openModal('customer-modal')">+ Customer</button>
-    <button class="btn btn-green" onclick="openModal('deal-modal')">+ Deal</button>
+    <button class="btn btn-amber btn-sm" onclick="openModal('inventory-modal')">+ Item</button>
+    <button class="btn btn-blue btn-sm" onclick="openModal('supplier-modal')">+ Supplier</button>
+    <button class="btn btn-outline btn-sm" onclick="openModal('customer-modal')">+ Customer</button>
+    <button class="btn btn-green btn-sm" onclick="openModal('deal-modal')">+ Deal</button>
   </div>
 </div>
 
@@ -156,73 +166,121 @@ select.form-input option{background:var(--bg2)}
   <div class="main-panel" id="main-panel">
 
     <!-- OVERVIEW TAB -->
-    <div id="tab-overview">
+    <div id="tab-overview" style="display:flex;flex-direction:column;gap:10px">
       <div class="metrics" id="metrics-row">
         <div class="metric"><div class="loading">Loading...</div></div>
         <div class="metric"><div class="loading">Loading...</div></div>
         <div class="metric"><div class="loading">Loading...</div></div>
         <div class="metric"><div class="loading">Loading...</div></div>
       </div>
-
       <div class="mid-row">
         <div class="card">
           <div class="card-head">
             <div class="card-title">Iran Customer Map</div>
             <div class="card-sub" id="map-label">loading...</div>
           </div>
-          <div class="map-container">
-            <svg class="iran-svg" viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg">
-              <rect width="500" height="280" fill="#06101e"/>
-              <path d="M 75 105 L 90 72 L 118 52 L 152 45 L 188 48 L 212 40 L 248 42 L 282 40 L 314 50 L 344 56 L 372 70 L 390 88 L 396 110 L 390 133 L 376 152 L 358 168 L 338 182 L 312 192 L 284 200 L 256 205 L 228 204 L 200 200 L 172 192 L 146 182 L 120 168 L 98 152 L 80 132 Z"
-                fill="#0f1f38" stroke="rgba(0,229,176,0.2)" stroke-width="1.5"/>
-              <path d="M 120 168 L 100 185 L 108 200 L 135 204 L 165 202 L 200 200" fill="rgba(59,139,255,0.06)" stroke="rgba(59,139,255,0.2)" stroke-width="0.8"/>
+          <div style="background:var(--bg0);border-radius:8px;overflow:hidden;margin-bottom:8px">
+            <svg class="iran-svg" id="iran-map-svg" viewBox="0 0 800 520" xmlns="http://www.w3.org/2000/svg">
+              <rect width="800" height="520" fill="#06101e"/>
+              <!-- Iran real shape approximation -->
+              <path id="iran-shape" d="
+                M 120 180 L 135 155 L 155 135 L 175 118 L 200 105 L 228 95 L 255 88 L 280 82 L 305 78 L 328 75
+                L 350 73 L 372 72 L 395 74 L 418 78 L 440 84 L 460 92 L 478 102 L 495 114 L 510 128
+                L 522 144 L 532 160 L 540 177 L 545 195 L 547 213 L 545 230 L 540 246 L 532 260
+                L 522 273 L 510 284 L 497 293 L 483 300 L 468 305 L 455 310 L 445 318 L 438 330
+                L 432 345 L 428 362 L 425 380 L 422 398 L 418 414 L 412 428 L 403 440 L 392 450
+                L 378 457 L 362 462 L 344 464 L 325 463 L 305 459 L 284 452 L 263 443 L 242 432
+                L 222 420 L 205 408 L 190 395 L 178 382 L 168 368 L 160 353 L 153 337 L 148 320
+                L 144 303 L 141 286 L 138 268 L 136 250 L 133 232 L 128 214 L 122 197 Z"
+                fill="#0d1e35" stroke="rgba(0,229,176,0.3)" stroke-width="1.5"/>
+              <!-- Caspian Sea -->
+              <ellipse cx="400" cy="65" rx="60" ry="22" fill="rgba(59,139,255,0.15)" stroke="rgba(59,139,255,0.3)" stroke-width="0.8"/>
+              <text x="400" y="68" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(59,139,255,0.5)">Caspian</text>
+              <!-- Persian Gulf -->
+              <path d="M 148 380 L 135 400 L 128 420 L 130 438 L 140 452 L 158 462 L 178 468 L 200 470 L 225 468 L 245 462 L 262 452 L 270 440 L 268 425 L 258 412 L 245 403 L 230 398 L 215 395 L 200 393 L 185 391 L 170 388 L 158 384 Z"
+                fill="rgba(59,139,255,0.1)" stroke="rgba(59,139,255,0.2)" stroke-width="0.8"/>
+              <text x="200" y="445" text-anchor="middle" font-family="DM Mono,monospace" font-size="8" fill="rgba(59,139,255,0.4)">Persian Gulf</text>
               <g id="city-dots"></g>
             </svg>
           </div>
           <div id="city-bars"></div>
         </div>
-
         <div class="card">
           <div class="card-head">
             <div class="card-title">Recent Deals</div>
             <div class="card-sub" id="deals-label">loading...</div>
           </div>
-          <div style="overflow-y:auto;max-height:300px">
-            <table class="deals-table">
-              <thead><tr>
-                <th>Customer</th><th>Product</th>
-                <th>Recv.</th><th>Profit</th><th>Status</th>
-              </tr></thead>
+          <div style="overflow-y:auto;max-height:280px">
+            <table class="tbl">
+              <thead><tr><th>Customer</th><th>Item</th><th>Recv.</th><th>Profit</th><th>Status</th></tr></thead>
               <tbody id="deals-tbody"><tr><td colspan="5" class="loading">Loading...</td></tr></tbody>
             </table>
           </div>
         </div>
       </div>
-
       <div class="mid-row">
         <div class="card">
-          <div class="card-head"><div class="card-title">Profit Trend</div></div>
-          <div class="chart-wrap"><canvas id="profitChart" role="img" aria-label="Profit trend chart"></canvas></div>
+          <div class="card-head"><div class="card-title">Profit Trend (AED)</div></div>
+          <div class="chart-wrap"><canvas id="profitChart" role="img" aria-label="Profit trend"></canvas></div>
         </div>
         <div class="card">
           <div class="card-head"><div class="card-title">Financial Summary</div><div class="card-sub">Pre-sale model</div></div>
-          <div id="fin-summary" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+          <div id="fin-summary" style="display:grid;grid-template-columns:1fr 1fr;gap:7px"></div>
         </div>
       </div>
     </div>
 
-    <!-- SUPPLIERS TAB -->
-    <div id="tab-suppliers" style="display:none">
-      <div id="suppliers-list"></div>
+    <!-- INVENTORY TAB -->
+    <div id="tab-inventory" style="display:none">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Inventory — Items from Suppliers</div>
+          <button class="btn btn-amber btn-sm" onclick="openModal('inventory-modal')">+ Add Item</button>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th>Brand</th><th>Supplier</th><th>Buy Price</th><th>Qty</th><th>Condition</th><th>Status</th></tr></thead>
+          <tbody id="inventory-tbody"><tr><td colspan="7" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DEALS TAB -->
+    <div id="tab-deals" style="display:none">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">All Deals</div>
+          <button class="btn btn-green btn-sm" onclick="openModal('deal-modal')">+ New Deal</button>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Item</th><th>Received</th><th>Cost</th><th>Profit</th><th>Margin</th><th>Status</th></tr></thead>
+          <tbody id="all-deals-tbody"><tr><td colspan="9" class="loading">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INVOICES TAB -->
+    <div id="tab-invoices" style="display:none">
+      <div id="invoices-list"></div>
     </div>
 
   </div>
 
   <!-- SIDE PANEL -->
   <div class="side-panel">
-    <div class="side-section-title">Customers (<span id="cust-count">0</span>)</div>
+    <div class="side-sec-title">Customers (<span id="cust-count">0</span>)</div>
     <input class="search-box" placeholder="Search name or city..." id="search-input" oninput="renderCustomers()">
     <div id="customer-list"><div class="loading">Loading...</div></div>
+  </div>
+</div>
+
+<!-- CUSTOMER DETAIL MODAL -->
+<div class="modal-bg" id="customer-detail-modal">
+  <div class="modal" style="width:560px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="modal-title" style="margin-bottom:0" id="cd-modal-title">Customer Profile</div>
+      <button class="btn btn-outline btn-sm" onclick="closeModals()">Close</button>
+    </div>
+    <div id="customer-detail-content"></div>
   </div>
 </div>
 
@@ -230,36 +288,22 @@ select.form-input option{background:var(--bg2)}
 <div class="modal-bg" id="customer-modal">
   <div class="modal">
     <div class="modal-title">New Customer</div>
-    <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input class="form-input" id="c-name" placeholder="e.g. Ahmad Rezaei">
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">City (Iran)</label>
-        <select class="form-input" id="c-city">
-          <option>Tehran</option><option>Isfahan</option><option>Mashhad</option>
-          <option>Shiraz</option><option>Tabriz</option><option>Ahvaz</option>
-          <option>Karaj</option><option>Qom</option><option>Kermanshah</option>
-          <option>Rasht</option><option>Urmia</option><option>Hamadan</option>
-          <option>Other</option>
+    <div class="fg"><label class="fl">Full Name</label><input class="fi" id="c-name" placeholder="e.g. Ahmad Rezaei"></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">City (Iran)</label>
+        <select class="fi" id="c-city">
+          <option>Tehran</option><option>Isfahan</option><option>Mashhad</option><option>Shiraz</option>
+          <option>Tabriz</option><option>Ahvaz</option><option>Karaj</option><option>Qom</option>
+          <option>Kermanshah</option><option>Rasht</option><option>Urmia</option><option>Hamadan</option>
+          <option>Yazd</option><option>Bandar Abbas</option><option>Other</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">WhatsApp</label>
-        <input class="form-input" id="c-phone" placeholder="+98...">
-      </div>
+      <div class="fg"><label class="fl">WhatsApp</label><input class="fi" id="c-phone" placeholder="+98..."></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Type</label>
-      <select class="form-input" id="c-type">
-        <option>Wholesale Buyer</option><option>Retail</option><option>Individual</option>
-      </select>
+    <div class="fg"><label class="fl">Type</label>
+      <select class="fi" id="c-type"><option>Wholesale Buyer</option><option>Retail</option><option>Individual</option></select>
     </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <input class="form-input" id="c-notes" placeholder="Optional notes...">
-    </div>
+    <div class="fg"><label class="fl">Notes</label><input class="fi" id="c-notes" placeholder="Optional..."></div>
     <div class="form-row">
       <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
       <button class="btn btn-green" onclick="saveCustomer()">Save Customer</button>
@@ -271,38 +315,52 @@ select.form-input option{background:var(--bg2)}
 <div class="modal-bg" id="supplier-modal">
   <div class="modal">
     <div class="modal-title">New Supplier</div>
-    <div class="form-group">
-      <label class="form-label">Supplier Name</label>
-      <input class="form-input" id="s-name" placeholder="e.g. Ahmad Mobile Sharjah">
+    <div class="fg"><label class="fl">Supplier Name</label><input class="fi" id="s-name" placeholder="e.g. Ahmad Mobile Sharjah"></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">WhatsApp</label><input class="fi" id="s-whatsapp" placeholder="+971..."></div>
+      <div class="fg"><label class="fl">Location</label><input class="fi" id="s-location" value="Sharjah"></div>
     </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">WhatsApp</label>
-        <input class="form-input" id="s-whatsapp" placeholder="+971...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Location</label>
-        <input class="form-input" id="s-location" value="Sharjah">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Speciality (comma separated)</label>
-      <input class="form-input" id="s-speciality" placeholder="iPhone, Samsung, Laptop">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Rating (1-5)</label>
-      <select class="form-input" id="s-rating">
+    <div class="fg"><label class="fl">Speciality (comma separated)</label><input class="fi" id="s-speciality" placeholder="iPhone, Samsung, Laptop, PS5"></div>
+    <div class="fg"><label class="fl">Rating (1-5)</label>
+      <select class="fi" id="s-rating">
         <option value="5">5 ★★★★★</option><option value="4">4 ★★★★</option>
         <option value="3">3 ★★★</option><option value="2">2 ★★</option><option value="1">1 ★</option>
       </select>
     </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <input class="form-input" id="s-notes" placeholder="Optional...">
-    </div>
+    <div class="fg"><label class="fl">Notes</label><input class="fi" id="s-notes" placeholder="Optional..."></div>
     <div class="form-row">
       <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
       <button class="btn btn-blue" onclick="saveSupplier()">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVENTORY MODAL -->
+<div class="modal-bg" id="inventory-modal">
+  <div class="modal">
+    <div class="modal-title">Add Item to Inventory</div>
+    <div class="fg"><label class="fl">Supplier</label><select class="fi" id="inv-supplier"></select></div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Item Name</label><input class="fi" id="inv-name" placeholder="e.g. iPhone 15 Pro"></div>
+      <div class="fg"><label class="fl">Brand</label><input class="fi" id="inv-brand" placeholder="Apple"></div>
+    </div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Model / Spec</label><input class="fi" id="inv-model" placeholder="256GB Black"></div>
+      <div class="fg"><label class="fl">Condition</label>
+        <select class="fi" id="inv-condition"><option>Grade A</option><option>Grade B</option><option>New</option><option>Refurbished</option></select>
+      </div>
+    </div>
+    <div class="fg3">
+      <div class="fg"><label class="fl">Buy Price (AED)</label><input class="fi" id="inv-price" type="number" placeholder="0"></div>
+      <div class="fg"><label class="fl">Quantity</label><input class="fi" id="inv-qty" type="number" placeholder="1" value="1"></div>
+      <div class="fg"><label class="fl">Available</label>
+        <select class="fi" id="inv-available"><option value="true">Yes</option><option value="false">No</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Notes</label><input class="fi" id="inv-notes" placeholder="Optional..."></div>
+    <div class="form-row">
+      <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
+      <button class="btn btn-amber" onclick="saveInventory()">Add to Inventory</button>
     </div>
   </div>
 </div>
@@ -311,62 +369,43 @@ select.form-input option{background:var(--bg2)}
 <div class="modal-bg" id="deal-modal">
   <div class="modal">
     <div class="modal-title">New Deal</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Customer</label>
-        <select class="form-input" id="d-customer"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Supplier</label>
-        <select class="form-input" id="d-supplier"></select>
-      </div>
+    <div class="fg2">
+      <div class="fg"><label class="fl">Customer</label><select class="fi" id="d-customer"></select></div>
+      <div class="fg"><label class="fl">Supplier</label><select class="fi" id="d-supplier" onchange="filterInventory()"></select></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Product / Item</label>
-      <input class="form-input" id="d-product" placeholder="e.g. iPhone 15 Pro 256GB x2">
+    <div class="fg"><label class="fl">Item from Inventory</label><select class="fi" id="d-inventory" onchange="onInventorySelect()"></select></div>
+    <div class="fg3">
+      <div class="fg"><label class="fl">Quantity</label><input class="fi" id="d-qty" type="number" value="1" min="1" oninput="calcProfit()"></div>
+      <div class="fg"><label class="fl">Received / Unit (AED)</label><input class="fi" id="d-received" type="number" placeholder="0" oninput="calcProfit()"></div>
+      <div class="fg"><label class="fl">Buy Price / Unit (AED)</label><input class="fi" id="d-cost" type="number" placeholder="0" oninput="calcProfit()"></div>
     </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Received from Customer (AED)</label>
-        <input class="form-input" id="d-received" type="number" placeholder="0" oninput="calcProfit()">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Purchase Cost (AED)</label>
-        <input class="form-input" id="d-cost" type="number" placeholder="0" oninput="calcProfit()">
+    <div class="fg2">
+      <div class="fg"><label class="fl">Shipping Total (AED)</label><input class="fi" id="d-shipping" type="number" placeholder="0" oninput="calcProfit()"></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fi" id="d-status">
+          <option value="pending">Pending Payment</option>
+          <option value="paid">Paid — In Transit</option>
+          <option value="delivered">Delivered</option>
+        </select>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Shipping (AED)</label>
-      <input class="form-input" id="d-shipping" type="number" placeholder="0" oninput="calcProfit()">
-    </div>
-    <div class="profit-preview">
-      <div class="pp-row">
-        <div class="pp-item"><div class="pp-val c-acc" id="pp-recv">0</div><div class="pp-lbl">Received</div></div>
-        <div class="pp-arrow">−</div>
-        <div class="pp-item"><div class="pp-val c-acc3" id="pp-cost">0</div><div class="pp-lbl">Cost+Ship</div></div>
-        <div class="pp-arrow">=</div>
-        <div class="pp-item"><div class="pp-val c-acc2" id="pp-margin">0%</div><div class="pp-lbl">Margin</div></div>
+    <div class="profit-box">
+      <div class="pb-row">
+        <div class="pb-item"><div class="pb-val c-acc" id="pb-recv">0</div><div class="pb-lbl">Total Received</div></div>
+        <div class="pb-arrow">−</div>
+        <div class="pb-item"><div class="pb-val c-acc3" id="pb-cost">0</div><div class="pb-lbl">Total Cost+Ship</div></div>
+        <div class="pb-arrow">=</div>
+        <div class="pb-item"><div class="pb-val c-acc2" id="pb-margin">0%</div><div class="pb-lbl">Margin</div></div>
       </div>
-      <div class="pp-result">
-        <div class="pp-big" id="pp-profit">AED 0</div>
-        <div class="pp-sub">Net Profit — Zero Capital Risk</div>
+      <div class="pb-result">
+        <div class="pb-big" id="pb-profit">AED 0</div>
+        <div class="pb-sub">Net Profit — Zero Capital Risk</div>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Status</label>
-      <select class="form-input" id="d-status">
-        <option value="pending">Pending Payment</option>
-        <option value="paid">Paid — In Transit</option>
-        <option value="delivered">Delivered</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <input class="form-input" id="d-notes" placeholder="Optional...">
-    </div>
+    <div class="fg"><label class="fl">Notes</label><input class="fi" id="d-notes" placeholder="Optional..."></div>
     <div class="form-row">
       <button class="btn btn-outline" onclick="closeModals()">Cancel</button>
-      <button class="btn btn-green" onclick="saveDeal()">Save Deal</button>
+      <button class="btn btn-green" onclick="saveDeal()">Save Deal + Generate Invoice</button>
     </div>
   </div>
 </div>
@@ -374,74 +413,66 @@ select.form-input option{background:var(--bg2)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── SUPABASE ─────────────────────────────────────────────────
 const SUPABASE_URL = 'https://gwjdsgpchzdphywfgype.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3amRzZ3BjaHpkcGh5d2ZneXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzY2ODYsImV4cCI6MjA5MzU1MjY4Nn0.cvQPPig--EQCHtQzxRsdYb--6nOv9EYpN30hxY5Nq_w';
-const { createClient } = supabase;
+const {createClient} = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ─── STATE ────────────────────────────────────────────────────
-let customers = [], suppliers = [], deals = [];
+let customers=[], suppliers=[], deals=[], inventory=[], invoices=[];
 
 const CITY_COORDS = {
-  Tehran:    {x:222,y:105,color:'#00e5b0'},
-  Isfahan:   {x:212,y:148,color:'#3b8bff'},
-  Mashhad:   {x:352,y:85, color:'#f5a623'},
-  Shiraz:    {x:210,y:178,color:'#ff4d6d'},
-  Tabriz:    {x:120,y:78, color:'#a78bfa'},
-  Ahvaz:     {x:148,y:162,color:'#22d3ee'},
-  Karaj:     {x:204,y:100,color:'#00e5b0'},
-  Qom:       {x:220,y:126,color:'#3b8bff'},
-  Kermanshah:{x:136,y:124,color:'#f5a623'},
-  Rasht:     {x:168,y:75, color:'#a78bfa'},
-  Urmia:     {x:100,y:88, color:'#22d3ee'},
-  Hamadan:   {x:158,y:120,color:'#00e5b0'},
-  Other:     {x:258,y:145,color:'#94a3b8'},
+  Tehran:      {x:340,y:178,color:'#00e5b0'},
+  Isfahan:     {x:320,y:265,color:'#3b8bff'},
+  Mashhad:     {x:535,y:148,color:'#f5a623'},
+  Shiraz:      {x:295,y:335,color:'#ff4d6d'},
+  Tabriz:      {x:192,y:148,color:'#a78bfa'},
+  Ahvaz:       {x:228,y:295,color:'#22d3ee'},
+  Karaj:       {x:318,y:170,color:'#00e5b0'},
+  Qom:         {x:328,y:215,color:'#3b8bff'},
+  Kermanshah:  {x:222,y:228,color:'#f5a623'},
+  Rasht:       {x:285,y:132,color:'#a78bfa'},
+  Urmia:       {x:162,y:165,color:'#22d3ee'},
+  Hamadan:     {x:255,y:212,color:'#00e5b0'},
+  Yazd:        {x:378,y:278,color:'#f5a623'},
+  'Bandar Abbas':{x:355,y:388,color:'#ff4d6d'},
+  Other:       {x:370,y:240,color:'#94a3b8'},
 };
 
-// ─── CLOCK ────────────────────────────────────────────────────
-setInterval(()=>{
-  document.getElementById('clock').textContent =
-    new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-},1000);
+setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})},1000);
 
-// ─── TOAST ────────────────────────────────────────────────────
 function toast(msg,isErr=false){
   const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.style.color=isErr?'var(--acc4)':'var(--acc)';
+  el.textContent=msg;el.style.color=isErr?'var(--acc4)':'var(--acc)';
   el.style.borderColor=isErr?'rgba(255,77,109,0.3)':'rgba(0,229,176,0.3)';
-  el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),3000);
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-// ─── LOAD DATA ────────────────────────────────────────────────
 async function loadAll(){
   try{
-    const [c,s,d] = await Promise.all([
+    const [c,s,d,inv,inv2]=await Promise.all([
       db.from('customers').select('*').order('created_at',{ascending:false}),
       db.from('suppliers').select('*').order('created_at',{ascending:false}),
       db.from('deals').select('*').order('created_at',{ascending:false}),
+      db.from('inventory').select('*').order('listed_at',{ascending:false}),
+      db.from('invoices').select('*').order('created_at',{ascending:false}),
     ]);
     if(c.error)throw c.error;
-    if(s.error)throw s.error;
-    if(d.error)throw d.error;
-    customers=c.data||[];
-    suppliers=s.data||[];
-    deals=d.data||[];
+    customers=c.data||[];suppliers=s.data||[];deals=d.data||[];
+    inventory=inv.data||[];invoices=inv2.data||[];
     document.getElementById('sync-label').textContent='Live';
     renderAll();
   }catch(e){
     document.getElementById('sync-label').textContent='Error';
-    toast('Connection error: '+e.message,true);
+    toast('Error: '+e.message,true);
   }
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────
 function getCustomer(id){return customers.find(c=>c.id===id)||{name:'Unknown',city:'—'}}
 function getSupplier(id){return suppliers.find(s=>s.id===id)||{name:'—'}}
-function dealProfit(d){return(d.profit_aed!==null&&d.profit_aed!==undefined)?Number(d.profit_aed):(d.received_aed-d.cost_aed-d.shipping_aed)}
+function getInvItem(id){return inventory.find(i=>i.id===id)||null}
+function dealProfit(d){return d.profit_aed!==null&&d.profit_aed!==undefined?Number(d.profit_aed):(Number(d.received_aed)-Number(d.cost_aed)-Number(d.shipping_aed))}
 function fmtAED(n){return'AED '+(+n||0).toLocaleString(undefined,{maximumFractionDigits:0})}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}
 
 function getCityCounts(){
   const map={};
@@ -453,106 +484,137 @@ function getCityRevenue(city){
   return deals.filter(d=>ids.includes(d.customer_id)).reduce((s,d)=>s+Number(d.received_aed),0);
 }
 
-// ─── METRICS ─────────────────────────────────────────────────
 function renderMetrics(){
   const totalRecv=deals.reduce((s,d)=>s+Number(d.received_aed),0);
   const totalCost=deals.reduce((s,d)=>s+Number(d.cost_aed)+Number(d.shipping_aed),0);
   const totalProfit=deals.reduce((s,d)=>s+dealProfit(d),0);
   const pending=deals.filter(d=>d.status==='pending').reduce((s,d)=>s+Number(d.received_aed),0);
   const margin=totalRecv>0?(totalProfit/totalRecv*100).toFixed(1):0;
-
   document.getElementById('metrics-row').innerHTML=[
-    {label:'Total Received',val:fmtAED(totalRecv),sub:`${deals.length} deals · avg ${margin}% margin`,badge:'PRE-SALE MODEL',bc:'mb-info',col:'c-acc2',lc:'var(--acc2)'},
-    {label:'Purchase Cost',val:fmtAED(totalCost),sub:'Paid after receiving',badge:'ZERO CAPITAL RISK',bc:'mb-up',col:'c-acc3',lc:'var(--acc3)'},
-    {label:'Net Profit',val:fmtAED(totalProfit),sub:`${customers.length} customers · ${suppliers.length} suppliers`,badge:'+'+margin+'% MARGIN',bc:'mb-up',col:'c-acc',lc:'var(--acc)'},
-    {label:'Pending',val:fmtAED(pending),sub:`${deals.filter(d=>d.status==='pending').length} open invoices`,badge:'NEEDS ACTION',bc:'mb-down',col:'c-acc4',lc:'var(--acc4)'},
-  ].map(m=>`<div class="metric">
-    <div class="metric-label">${m.label}</div>
-    <div class="metric-val ${m.col}">${m.val}</div>
-    <div class="metric-sub">${m.sub}</div>
-    <div class="metric-badge ${m.bc}">${m.badge}</div>
-    <div class="metric-line" style="background:${m.lc};opacity:.4"></div>
-  </div>`).join('');
+    {l:'Total Received',v:fmtAED(totalRecv),s:`${deals.length} deals · ${margin}% avg`,b:'PRE-SALE MODEL',bc:'mb-info',c:'c-acc2',lc:'var(--acc2)'},
+    {l:'Purchase Cost',v:fmtAED(totalCost),s:'Paid after receiving',b:'ZERO CAPITAL RISK',bc:'mb-up',c:'c-acc3',lc:'var(--acc3)'},
+    {l:'Net Profit',v:fmtAED(totalProfit),s:`${customers.length} customers · ${suppliers.length} suppliers`,b:'+'+margin+'%',bc:'mb-up',c:'c-acc',lc:'var(--acc)'},
+    {l:'Pending',v:fmtAED(pending),s:`${deals.filter(d=>d.status==='pending').length} open`,b:'NEEDS ACTION',bc:'mb-down',c:'c-acc4',lc:'var(--acc4)'},
+  ].map(m=>`<div class="metric"><div class="metric-label">${m.l}</div><div class="metric-val ${m.c}">${m.v}</div><div class="metric-sub">${m.s}</div><div class="metric-badge ${m.bc}">${m.b}</div><div class="metric-line" style="background:${m.lc};opacity:.4"></div></div>`).join('');
 
-  const cities=getCityCounts().length;
   document.getElementById('fin-summary').innerHTML=`
-    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
-      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">CAPITAL AT RISK</div>
-      <div style="font-size:20px;font-weight:600;color:var(--acc)">AED 0</div>
-      <div style="font-size:10px;color:var(--acc);margin-top:2px">Customer pays first</div>
-    </div>
-    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
-      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">NET PROFIT</div>
-      <div style="font-size:20px;font-weight:600;color:var(--acc2)">${fmtAED(totalProfit)}</div>
-      <div style="font-size:10px;color:var(--acc2);margin-top:2px">${margin}% avg margin</div>
-    </div>
-    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
-      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">CUSTOMERS</div>
-      <div style="font-size:20px;font-weight:600;color:var(--acc3)">${customers.length}</div>
-      <div style="font-size:10px;color:var(--acc3);margin-top:2px">active accounts</div>
-    </div>
-    <div style="background:var(--bg0);border-radius:8px;padding:10px;text-align:center">
-      <div style="font-size:10px;color:var(--t3);margin-bottom:3px">CITIES</div>
-      <div style="font-size:20px;font-weight:600;color:var(--acc4)">${cities}</div>
-      <div style="font-size:10px;color:var(--acc4);margin-top:2px">across Iran</div>
-    </div>`;
+    <div style="background:var(--bg0);border-radius:7px;padding:9px;text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:3px">CAPITAL AT RISK</div><div style="font-size:18px;font-weight:600;color:var(--acc)">AED 0</div><div style="font-size:10px;color:var(--acc);margin-top:2px">Customer pays first</div></div>
+    <div style="background:var(--bg0);border-radius:7px;padding:9px;text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:3px">NET PROFIT</div><div style="font-size:18px;font-weight:600;color:var(--acc2)">${fmtAED(totalProfit)}</div><div style="font-size:10px;color:var(--acc2);margin-top:2px">${margin}% margin</div></div>
+    <div style="background:var(--bg0);border-radius:7px;padding:9px;text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:3px">CUSTOMERS</div><div style="font-size:18px;font-weight:600;color:var(--acc3)">${customers.length}</div><div style="font-size:10px;color:var(--acc3);margin-top:2px">active</div></div>
+    <div style="background:var(--bg0);border-radius:7px;padding:9px;text-align:center"><div style="font-size:10px;color:var(--t3);margin-bottom:3px">INVENTORY</div><div style="font-size:18px;font-weight:600;color:var(--acc4)">${inventory.filter(i=>i.available).length}</div><div style="font-size:10px;color:var(--acc4);margin-top:2px">items available</div></div>`;
 }
 
-// ─── MAP ─────────────────────────────────────────────────────
 function renderMap(){
   const cities=getCityCounts();
-  const total=customers.length||1;
-  const totalRev=deals.reduce((s,d)=>s+Number(d.received_aed),0)||1;
   document.getElementById('map-label').textContent=`${customers.length} customers · ${cities.length} cities`;
   const g=document.getElementById('city-dots');
   g.innerHTML='';
   cities.forEach(({city,count})=>{
     const c=CITY_COORDS[city]||CITY_COORDS.Other;
-    const r=Math.max(7,Math.min(18,7+count*3));
+    const r=Math.max(8,Math.min(20,8+count*3));
     const el=document.createElementNS('http://www.w3.org/2000/svg','g');
+    el.style.cursor='pointer';
     el.innerHTML=`
-      <circle cx="${c.x}" cy="${c.y}" r="${r+5}" fill="${c.color}" opacity="0.07"/>
-      <circle cx="${c.x}" cy="${c.y}" r="${r}" fill="${c.color}" opacity="0.85">
+      <circle cx="${c.x}" cy="${c.y}" r="${r+6}" fill="${c.color}" opacity="0.07"/>
+      <circle cx="${c.x}" cy="${c.y}" r="${r}" fill="${c.color}" opacity="0.88">
         <animate attributeName="r" values="${r};${r+2};${r}" dur="2s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.85;0.55;0.85" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.88;0.6;0.88" dur="2s" repeatCount="indefinite"/>
       </circle>
-      <text x="${c.x}" y="${c.y+1}" text-anchor="middle" dominant-baseline="central"
-        font-family="DM Mono,monospace" font-size="9" font-weight="500" fill="#000">${count}</text>
-      <text x="${c.x+r+5}" y="${c.y-3}" font-family="DM Mono,monospace" font-size="8.5" fill="#8896b0">${city}</text>`;
+      <text x="${c.x}" y="${c.y+1}" text-anchor="middle" dominant-baseline="central" font-family="DM Mono,monospace" font-size="9" font-weight="600" fill="#000">${count}</text>
+      <text x="${c.x+r+6}" y="${c.y-3}" font-family="DM Mono,monospace" font-size="8.5" fill="#8896b0">${city}</text>`;
     g.appendChild(el);
   });
   const maxRev=Math.max(...cities.map(c=>getCityRevenue(c.city)),1);
   document.getElementById('city-bars').innerHTML=cities.slice(0,6).map(({city,count})=>{
     const rev=getCityRevenue(city);
     const coord=CITY_COORDS[city]||CITY_COORDS.Other;
-    return `<div class="city-bar-row">
-      <div class="cbr-name">${city}</div>
-      <div class="cbr-track"><div class="cbr-fill" style="width:${Math.round(rev/maxRev*100)}%;background:${coord.color}"></div></div>
-      <div class="cbr-val" style="color:${coord.color}">${rev>0?fmtAED(rev):'—'}</div>
-      <div class="cbr-cnt">${count}c</div>
-    </div>`;
+    return `<div class="city-bar-row"><div class="cbr-name">${city}</div><div class="cbr-track"><div class="cbr-fill" style="width:${Math.round(rev/maxRev*100)}%;background:${coord.color}"></div></div><div class="cbr-val" style="color:${coord.color}">${rev>0?fmtAED(rev):'—'}</div><div class="cbr-cnt">${count}c</div></div>`;
   }).join('');
 }
 
-// ─── DEALS TABLE ──────────────────────────────────────────────
 function renderDeals(){
   document.getElementById('deals-label').textContent=`${deals.length} deals`;
-  const smap={pending:'sp-pending',paid:'sp-transit',delivered:'sp-delivered',in_transit:'sp-transit',cancelled:'sp-transit'};
+  const smap={pending:'sp-blue',paid:'sp-amber',delivered:'sp-green',in_transit:'sp-amber',cancelled:'sp-red'};
   const slbl={pending:'Pending',paid:'In Transit',delivered:'Delivered',in_transit:'In Transit',cancelled:'Cancelled'};
-  document.getElementById('deals-tbody').innerHTML=deals.slice(0,20).map(d=>{
+  document.getElementById('deals-tbody').innerHTML=deals.slice(0,15).map(d=>{
     const cust=getCustomer(d.customer_id);
     const profit=dealProfit(d);
-    return `<tr>
-      <td><div style="font-weight:500;color:var(--t1)">${cust.name}</div><div style="font-size:10px;color:var(--t3)">${cust.city}</div></td>
-      <td style="color:var(--t2);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.product}</td>
+    const inv=getInvItem(d.inventory_id);
+    return `<tr onclick="showCustomerDetail('${d.customer_id}')">
+      <td><div style="font-weight:500;color:var(--t1);font-size:11px">${cust.name}</div><div style="font-size:10px;color:var(--t3)">${cust.city}</div></td>
+      <td style="color:var(--t2);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.product||'—'}</td>
       <td style="color:var(--acc)">${(+d.received_aed||0).toLocaleString()}</td>
       <td style="color:${profit>=0?'var(--acc)':'var(--acc4)'};font-weight:500">${profit.toLocaleString(undefined,{maximumFractionDigits:0})}</td>
-      <td><span class="sp ${smap[d.status]||'sp-pending'}">${slbl[d.status]||d.status}</span></td>
+      <td><span class="sp ${smap[d.status]||'sp-blue'}">${slbl[d.status]||d.status}</span></td>
     </tr>`;
-  }).join('')||'<tr><td colspan="5" class="empty">No deals yet. Click + Deal to add.</td></tr>';
+  }).join('')||'<tr><td colspan="5" class="empty">No deals yet</td></tr>';
 }
 
-// ─── CUSTOMERS SIDEBAR ────────────────────────────────────────
+function renderAllDeals(){
+  const smap={pending:'sp-blue',paid:'sp-amber',delivered:'sp-green',cancelled:'sp-red'};
+  const slbl={pending:'Pending',paid:'In Transit',delivered:'Delivered',cancelled:'Cancelled'};
+  document.getElementById('all-deals-tbody').innerHTML=deals.map(d=>{
+    const cust=getCustomer(d.customer_id);
+    const profit=dealProfit(d);
+    const inv=invoices.find(i=>i.deal_id===d.id);
+    return `<tr onclick="showCustomerDetail('${d.customer_id}')">
+      <td style="color:var(--acc);font-weight:500">${inv?inv.invoice_no:'—'}</td>
+      <td style="color:var(--t3)">${fmtDate(d.created_at)}</td>
+      <td><div style="font-weight:500;color:var(--t1)">${cust.name}</div><div style="font-size:10px;color:var(--t3)">${cust.city}</div></td>
+      <td style="color:var(--t2);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.product||'—'}</td>
+      <td style="color:var(--acc)">${(+d.received_aed||0).toLocaleString()}</td>
+      <td style="color:var(--acc3)">${((+d.cost_aed||0)+(+d.shipping_aed||0)).toLocaleString()}</td>
+      <td style="color:${profit>=0?'var(--acc)':'var(--acc4)'};font-weight:500">${profit.toLocaleString(undefined,{maximumFractionDigits:0})}</td>
+      <td style="color:var(--t2)">${d.margin_pct?Number(d.margin_pct).toFixed(1)+'%':'—'}</td>
+      <td><span class="sp ${smap[d.status]||'sp-blue'}">${slbl[d.status]||d.status}</span></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="9" class="empty">No deals yet</td></tr>';
+}
+
+function renderInventory(){
+  document.getElementById('inventory-tbody').innerHTML=inventory.map(item=>{
+    const sup=getSupplier(item.supplier_id);
+    return `<tr>
+      <td><div style="font-weight:500;color:var(--t1)">${item.name}</div><div style="font-size:10px;color:var(--t3)">${item.model||''}</div></td>
+      <td style="color:var(--t2)">${item.brand||'—'}</td>
+      <td style="color:var(--acc3)">${sup.name}</td>
+      <td style="color:var(--acc);font-weight:500">AED ${Number(item.price_aed||0).toLocaleString()}</td>
+      <td style="color:var(--t2)">${item.quantity||1}</td>
+      <td><span class="sp ${item.condition==='New'?'sp-green':'sp-blue'}">${item.condition||'Grade A'}</span></td>
+      <td><span class="sp ${item.available?'sp-green':'sp-red'}">${item.available?'Available':'Sold'}</span></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="7" class="empty">No inventory items. Click + Item to add.</td></tr>';
+}
+
+function renderInvoices(){
+  document.getElementById('invoices-list').innerHTML=invoices.length?invoices.map(inv=>{
+    const deal=deals.find(d=>d.id===inv.deal_id);
+    const cust=deal?getCustomer(deal.customer_id):{name:'—',city:'—'};
+    const profit=deal?dealProfit(deal):0;
+    return `<div class="inv-card">
+      <div class="inv-header">
+        <div>
+          <div class="inv-no">${inv.invoice_no}</div>
+          <div class="inv-date">${fmtDate(inv.created_at)} · ${cust.name} · ${cust.city}</div>
+        </div>
+        <span class="sp ${inv.paid?'sp-green':'sp-blue'}">${inv.paid?'Paid':'Unpaid'}</span>
+      </div>
+      <div class="inv-body">
+        <div>Item: ${deal?deal.product:'—'}</div>
+        <div>Supplier: ${deal?getSupplier(deal.supplier_id).name:'—'}</div>
+        ${inv.notes?`<div>Notes: ${inv.notes}</div>`:''}
+      </div>
+      <div class="inv-total">
+        <div>
+          <div class="inv-total-label">Total Amount</div>
+          <div class="inv-profit">Profit: ${fmtAED(profit)}</div>
+        </div>
+        <div class="inv-total-val">${fmtAED(inv.amount_aed)}</div>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty" style="margin-top:40px">No invoices yet. Add a deal to generate invoice automatically.</div>';
+}
+
 function renderCustomers(){
   const q=(document.getElementById('search-input').value||'').toLowerCase();
   const filtered=customers.filter(c=>c.name.toLowerCase().includes(q)||c.city.toLowerCase().includes(q));
@@ -561,7 +623,7 @@ function renderCustomers(){
     const cd=deals.filter(d=>d.customer_id===c.id);
     const rev=cd.reduce((s,d)=>s+Number(d.received_aed),0);
     const profit=cd.reduce((s,d)=>s+dealProfit(d),0);
-    return `<div class="cust-card">
+    return `<div class="cust-card" onclick="showCustomerDetail('${c.id}')">
       <div class="cust-name">${c.name}</div>
       <div class="cust-meta"><span class="city-tag">${c.city}</span><span>${c.type}</span></div>
       <div class="cust-stats">
@@ -573,96 +635,152 @@ function renderCustomers(){
   }).join('')||'<div class="empty">No customers found</div>';
 }
 
-// ─── SUPPLIERS TAB ────────────────────────────────────────────
-function renderSuppliers(){
-  document.getElementById('suppliers-list').innerHTML=suppliers.length?
-    suppliers.map(s=>`<div class="card" style="margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <div class="card-title">${s.name}</div>
-        <span class="sp sp-transit">${s.active?'Active':'Inactive'}</span>
+function showCustomerDetail(customerId){
+  const c=customers.find(x=>x.id===customerId);
+  if(!c)return;
+  const cd=deals.filter(d=>d.customer_id===c.id);
+  const cinv=invoices.filter(i=>{const deal=deals.find(d=>d.id===i.deal_id);return deal&&deal.customer_id===c.id;});
+  const totalRev=cd.reduce((s,d)=>s+Number(d.received_aed),0);
+  const totalProfit=cd.reduce((s,d)=>s+dealProfit(d),0);
+  const totalCost=cd.reduce((s,d)=>s+Number(d.cost_aed)+Number(d.shipping_aed),0);
+  const initials=c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('cd-modal-title').textContent='Customer Profile';
+  document.getElementById('customer-detail-content').innerHTML=`
+    <div class="customer-detail">
+      <div class="cd-header">
+        <div class="cd-avatar">${initials}</div>
+        <div>
+          <div class="cd-name">${c.name}</div>
+          <div class="cd-meta">${c.city} · ${c.type} · ${c.phone||'No phone'}</div>
+          <div class="cd-meta">Customer since: ${fmtDate(c.created_at)}</div>
+        </div>
       </div>
-      <div style="font-size:11px;color:var(--t2);margin-bottom:4px">${s.whatsapp||'—'} · ${s.location}</div>
-      <div class="sup-tags">${(s.speciality||[]).map(t=>`<span class="sup-tag">${t}</span>`).join('')}</div>
-      <div class="rating-stars">${'★'.repeat(s.rating||0)}${'☆'.repeat(5-(s.rating||0))}</div>
-      ${s.notes?`<div style="font-size:11px;color:var(--t3);margin-top:6px">${s.notes}</div>`:''}
-    </div>`).join(''):
-    '<div class="empty" style="margin-top:40px">No suppliers yet. Click + Supplier to add.</div>';
+      <div class="cd-stats">
+        <div class="cd-stat"><div class="cd-stat-val c-acc">${cd.length}</div><div class="cd-stat-lbl">Total Deals</div></div>
+        <div class="cd-stat"><div class="cd-stat-val c-acc2" style="font-size:12px">${fmtAED(totalRev)}</div><div class="cd-stat-lbl">Total Revenue</div></div>
+        <div class="cd-stat"><div class="cd-stat-val c-acc3" style="font-size:12px">${fmtAED(totalCost)}</div><div class="cd-stat-lbl">Total Cost</div></div>
+        <div class="cd-stat"><div class="cd-stat-val ${totalProfit>=0?'c-acc':'c-acc4'}" style="font-size:12px">${fmtAED(totalProfit)}</div><div class="cd-stat-lbl">Net Profit</div></div>
+      </div>
+      ${c.notes?`<div style="font-size:11px;color:var(--t2);margin-bottom:8px">Notes: ${c.notes}</div>`:''}
+    </div>
+
+    <div class="section-title">Purchase History (${cd.length} deals)</div>
+    ${cd.length?cd.map(d=>{
+      const inv=invoices.find(i=>i.deal_id===d.id);
+      const sup=getSupplier(d.supplier_id);
+      const profit=dealProfit(d);
+      const smap={pending:'sp-blue',paid:'sp-amber',delivered:'sp-green',cancelled:'sp-red'};
+      const slbl={pending:'Pending',paid:'In Transit',delivered:'Delivered',cancelled:'Cancelled'};
+      return `<div class="inv-list-item">
+        <div class="ili-left">
+          <div class="ili-no">${inv?inv.invoice_no:'No Invoice'} · ${fmtDate(d.created_at)}</div>
+          <div class="ili-product">${d.product||'—'} · from ${sup.name}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">Cost: ${fmtAED(Number(d.cost_aed)+Number(d.shipping_aed))} · Profit: <span style="color:${profit>=0?'var(--acc)':'var(--acc4)'}">${fmtAED(profit)}</span></div>
+        </div>
+        <div class="ili-right">
+          <div class="ili-amount">${fmtAED(d.received_aed)}</div>
+          <span class="sp ${smap[d.status]||'sp-blue'}" style="font-size:10px">${slbl[d.status]||d.status}</span>
+        </div>
+      </div>`;
+    }).join(''):'<div class="empty">No deals yet</div>'}
+
+    <div class="section-title">Invoices (${cinv.length})</div>
+    ${cinv.length?cinv.map(inv=>{
+      const deal=deals.find(d=>d.id===inv.deal_id);
+      return `<div class="inv-list-item">
+        <div class="ili-left">
+          <div class="ili-no">${inv.invoice_no}</div>
+          <div class="ili-product">${deal?deal.product:'—'} · ${fmtDate(inv.created_at)}</div>
+        </div>
+        <div class="ili-right">
+          <div class="ili-amount">${fmtAED(inv.amount_aed)}</div>
+          <span class="sp ${inv.paid?'sp-green':'sp-blue'}" style="font-size:10px">${inv.paid?'Paid':'Unpaid'}</span>
+        </div>
+      </div>`;
+    }).join(''):'<div class="empty">No invoices</div>'}
+  `;
+  document.getElementById('customer-detail-modal').classList.add('open');
 }
 
-// ─── CHART ────────────────────────────────────────────────────
 let chart;
 function renderChart(){
   const ctx=document.getElementById('profitChart').getContext('2d');
   const now=new Date();
-  const labels=[];const data=[];
+  const labels=[],data=[];
   for(let i=5;i>=0;i--){
     const d=new Date(now.getFullYear(),now.getMonth()-i,1);
     labels.push(d.toLocaleString('en',{month:'short'}));
-    const profit=deals.filter(dl=>{
-      const dd=new Date(dl.created_at);
-      return dd.getMonth()===d.getMonth()&&dd.getFullYear()===d.getFullYear();
-    }).reduce((s,dl)=>s+dealProfit(dl),0);
+    const profit=deals.filter(dl=>{const dd=new Date(dl.created_at);return dd.getMonth()===d.getMonth()&&dd.getFullYear()===d.getFullYear();}).reduce((s,dl)=>s+dealProfit(dl),0);
     data.push(Math.round(profit));
   }
   if(chart)chart.destroy();
-  chart=new Chart(ctx,{
-    type:'line',
-    data:{labels,datasets:[{data,borderColor:'#00e5b0',backgroundColor:'rgba(0,229,176,0.06)',fill:true,tension:.4,pointBackgroundColor:'#00e5b0',pointRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3d5070',font:{size:10}}},
-        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3d5070',font:{size:10},callback:v=>v>=1000?Math.round(v/1000)+'K':v}}
-      }}
-  });
+  chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{data,borderColor:'#00e5b0',backgroundColor:'rgba(0,229,176,0.06)',fill:true,tension:.4,pointBackgroundColor:'#00e5b0',pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3d5070',font:{size:10}}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#3d5070',font:{size:10},callback:v=>v>=1000?Math.round(v/1000)+'K':v}}}}});
 }
 
-// ─── TABS ────────────────────────────────────────────────────
 function setTab(tab,el){
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('tab-overview').style.display=tab==='overview'?'flex':'none';
-  document.getElementById('tab-overview').style.flexDirection='column';
-  document.getElementById('tab-overview').style.gap='10px';
-  document.getElementById('tab-suppliers').style.display=tab==='suppliers'?'block':'none';
-  if(tab==='suppliers')renderSuppliers();
+  ['overview','inventory','deals','invoices'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    if(el)el.style.display=t===tab?(t==='overview'?'flex':'block'):'none';
+  });
+  if(tab==='overview'){document.getElementById('tab-overview').style.flexDirection='column';document.getElementById('tab-overview').style.gap='10px';}
+  if(tab==='inventory')renderInventory();
+  if(tab==='deals')renderAllDeals();
+  if(tab==='invoices')renderInvoices();
 }
 
-// ─── MODALS ──────────────────────────────────────────────────
 function openModal(id){
   if(id==='deal-modal'){
-    document.getElementById('d-customer').innerHTML=customers.map(c=>`<option value="${c.id}">${c.name} (${c.city})</option>`).join('')||'<option>No customers yet</option>';
-    document.getElementById('d-supplier').innerHTML=suppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')||'<option>No suppliers yet</option>';
-    calcProfit();
+    document.getElementById('d-customer').innerHTML=customers.map(c=>`<option value="${c.id}">${c.name} (${c.city})</option>`).join('')||'<option>No customers</option>';
+    document.getElementById('d-supplier').innerHTML='<option value="">All Suppliers</option>'+suppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+    filterInventory();calcProfit();
+  }
+  if(id==='inventory-modal'){
+    document.getElementById('inv-supplier').innerHTML=suppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')||'<option>No suppliers</option>';
   }
   document.getElementById(id).classList.add('open');
 }
 function closeModals(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('open'));}
-document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals()}));
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModals();}));
+
+function filterInventory(){
+  const supId=document.getElementById('d-supplier').value;
+  const filtered=inventory.filter(i=>i.available&&(!supId||i.supplier_id===supId));
+  document.getElementById('d-inventory').innerHTML='<option value="">-- Select Item --</option>'+filtered.map(i=>`<option value="${i.id}" data-price="${i.price_aed}" data-supplier="${i.supplier_id}">${i.name} ${i.model||''} · AED ${Number(i.price_aed).toLocaleString()}</option>`).join('');
+}
+
+function onInventorySelect(){
+  const sel=document.getElementById('d-inventory');
+  const opt=sel.options[sel.selectedIndex];
+  if(opt&&opt.dataset.price){
+    document.getElementById('d-cost').value=opt.dataset.price;
+    if(opt.dataset.supplier)document.getElementById('d-supplier').value=opt.dataset.supplier;
+    calcProfit();
+  }
+}
 
 function calcProfit(){
+  const qty=parseFloat(document.getElementById('d-qty').value)||1;
   const recv=parseFloat(document.getElementById('d-received').value)||0;
   const cost=parseFloat(document.getElementById('d-cost').value)||0;
   const ship=parseFloat(document.getElementById('d-shipping').value)||0;
-  const profit=recv-(cost+ship);
-  const margin=recv>0?(profit/recv*100).toFixed(1):0;
-  document.getElementById('pp-recv').textContent=recv.toLocaleString();
-  document.getElementById('pp-cost').textContent=(cost+ship).toLocaleString();
-  document.getElementById('pp-margin').textContent=margin+'%';
-  document.getElementById('pp-profit').textContent='AED '+profit.toLocaleString(undefined,{maximumFractionDigits:0});
-  document.getElementById('pp-profit').style.color=profit>=0?'var(--acc)':'var(--acc4)';
+  const totalRecv=recv*qty;
+  const totalCost=cost*qty+ship;
+  const profit=totalRecv-totalCost;
+  const margin=totalRecv>0?(profit/totalRecv*100).toFixed(1):0;
+  document.getElementById('pb-recv').textContent=totalRecv.toLocaleString();
+  document.getElementById('pb-cost').textContent=totalCost.toLocaleString();
+  document.getElementById('pb-margin').textContent=margin+'%';
+  document.getElementById('pb-profit').textContent='AED '+profit.toLocaleString(undefined,{maximumFractionDigits:0});
+  document.getElementById('pb-profit').style.color=profit>=0?'var(--acc)':'var(--acc4)';
 }
 
-// ─── SAVE FUNCTIONS ───────────────────────────────────────────
 async function saveCustomer(){
   const name=document.getElementById('c-name').value.trim();
-  if(!name){toast('Please enter customer name',true);return;}
-  const {error}=await db.from('customers').insert({
-    name,city:document.getElementById('c-city').value,
-    phone:document.getElementById('c-phone').value,
-    whatsapp:document.getElementById('c-phone').value,
-    type:document.getElementById('c-type').value,
-    notes:document.getElementById('c-notes').value,
-  });
+  if(!name){toast('Please enter name',true);return;}
+  const{error}=await db.from('customers').insert({name,city:document.getElementById('c-city').value,phone:document.getElementById('c-phone').value,whatsapp:document.getElementById('c-phone').value,type:document.getElementById('c-type').value,notes:document.getElementById('c-notes').value});
   if(error){toast('Error: '+error.message,true);return;}
   toast('Customer saved!');closeModals();
   document.getElementById('c-name').value='';document.getElementById('c-phone').value='';document.getElementById('c-notes').value='';
@@ -671,52 +789,63 @@ async function saveCustomer(){
 
 async function saveSupplier(){
   const name=document.getElementById('s-name').value.trim();
-  if(!name){toast('Please enter supplier name',true);return;}
+  if(!name){toast('Please enter name',true);return;}
   const spec=document.getElementById('s-speciality').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const {error}=await db.from('suppliers').insert({
-    name,whatsapp:document.getElementById('s-whatsapp').value,
-    location:document.getElementById('s-location').value,
-    speciality:spec,rating:parseInt(document.getElementById('s-rating').value),
-    notes:document.getElementById('s-notes').value,
-  });
+  const{error}=await db.from('suppliers').insert({name,whatsapp:document.getElementById('s-whatsapp').value,location:document.getElementById('s-location').value,speciality:spec,rating:parseInt(document.getElementById('s-rating').value),notes:document.getElementById('s-notes').value});
   if(error){toast('Error: '+error.message,true);return;}
   toast('Supplier saved!');closeModals();
-  document.getElementById('s-name').value='';document.getElementById('s-whatsapp').value='';document.getElementById('s-speciality').value='';document.getElementById('s-notes').value='';
+  document.getElementById('s-name').value='';document.getElementById('s-whatsapp').value='';document.getElementById('s-speciality').value='';
+  await loadAll();
+}
+
+async function saveInventory(){
+  const name=document.getElementById('inv-name').value.trim();
+  const price=parseFloat(document.getElementById('inv-price').value)||0;
+  if(!name||price===0){toast('Please fill name and price',true);return;}
+  const{error}=await db.from('inventory').insert({supplier_id:document.getElementById('inv-supplier').value,name,brand:document.getElementById('inv-brand').value,model:document.getElementById('inv-model').value,price_aed:price,condition:document.getElementById('inv-condition').value,quantity:parseInt(document.getElementById('inv-qty').value)||1,available:document.getElementById('inv-available').value==='true',notes:document.getElementById('inv-notes').value});
+  if(error){toast('Error: '+error.message,true);return;}
+  toast('Item added to inventory!');closeModals();
+  document.getElementById('inv-name').value='';document.getElementById('inv-brand').value='';document.getElementById('inv-model').value='';document.getElementById('inv-price').value='';
   await loadAll();
 }
 
 async function saveDeal(){
-  const product=document.getElementById('d-product').value.trim();
-  const recv=parseFloat(document.getElementById('d-received').value)||0;
-  if(!product||recv===0){toast('Please fill product and received amount',true);return;}
   const custId=document.getElementById('d-customer').value;
-  const supId=document.getElementById('d-supplier').value;
-  const {error}=await db.from('deals').insert({
-    customer_id:custId||null,supplier_id:supId||null,
-    product,received_aed:recv,
-    cost_aed:parseFloat(document.getElementById('d-cost').value)||0,
-    shipping_aed:parseFloat(document.getElementById('d-shipping').value)||0,
-    status:document.getElementById('d-status').value,
-    notes:document.getElementById('d-notes').value,
-  });
-  if(error){toast('Error: '+error.message,true);return;}
-  toast('Deal saved!');closeModals();
-  document.getElementById('d-product').value='';document.getElementById('d-received').value='';
-  document.getElementById('d-cost').value='';document.getElementById('d-shipping').value='';document.getElementById('d-notes').value='';
+  const supId=document.getElementById('d-supplier').value||null;
+  const invId=document.getElementById('d-inventory').value||null;
+  const qty=parseFloat(document.getElementById('d-qty').value)||1;
+  const recv=parseFloat(document.getElementById('d-received').value)||0;
+  const cost=parseFloat(document.getElementById('d-cost').value)||0;
+  const ship=parseFloat(document.getElementById('d-shipping').value)||0;
+  const product=invId?(document.getElementById('d-inventory').options[document.getElementById('d-inventory').selectedIndex]?.text||'Item'):'Custom Item';
+  if(!custId||recv===0){toast('Please select customer and enter received amount',true);return;}
+
+  const totalRecv=recv*qty;
+  const totalCost=cost*qty+ship;
+
+  const{data:dealData,error:dealErr}=await db.from('deals').insert({
+    customer_id:custId,supplier_id:supId,inventory_id:invId,
+    product,quantity:qty,received_aed:totalRecv,cost_aed:totalCost-ship,shipping_aed:ship,
+    status:document.getElementById('d-status').value,notes:document.getElementById('d-notes').value
+  }).select().single();
+
+  if(dealErr){toast('Error: '+dealErr.message,true);return;}
+
+  // Auto-generate invoice
+  const{error:invErr}=await db.from('invoices').insert({deal_id:dealData.id,invoice_no:'',amount_aed:totalRecv,paid:false});
+  if(invErr){toast('Deal saved but invoice error: '+invErr.message,true);}
+  else{toast('Deal saved + Invoice generated!');}
+
+  closeModals();
+  document.getElementById('d-received').value='';document.getElementById('d-cost').value='';document.getElementById('d-shipping').value='';document.getElementById('d-notes').value='';document.getElementById('d-qty').value='1';
   await loadAll();
 }
 
-// ─── RENDER ALL ───────────────────────────────────────────────
 function renderAll(){
   renderMetrics();renderMap();renderDeals();renderCustomers();renderChart();
 }
 
-// ─── REALTIME ────────────────────────────────────────────────
-db.channel('changes')
-  .on('postgres_changes',{event:'*',schema:'public'},()=>loadAll())
-  .subscribe();
-
-// ─── INIT ────────────────────────────────────────────────────
+db.channel('changes').on('postgres_changes',{event:'*',schema:'public'},()=>loadAll()).subscribe();
 loadAll();
 </script>
 </body>
